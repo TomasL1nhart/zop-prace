@@ -1,5 +1,38 @@
 {block content}
+  <h1 class="text-3xl font-bold mb-4">Upravit příspěvek</h1>
+  <form n:form="editPostForm" enctype="multipart/form-data" class="space-y-4">
 
-<h1>Upravit příspěvek</h1>
+    <div>
+      <label class="block font-medium">Nadpis</label>
+      <input n:name="title" class="w-full border rounded p-2" type="text">
+    </div>
 
-{control postForm}
+    <div>
+      <label class="block font-medium">Kategorie</label>
+      <select n:name="category_id" class="w-full border rounded p-2"></select>
+    </div>
+
+    <div>
+      <label class="block font-medium">Obsah</label>
+      <textarea n:name="content" class="w-full border rounded p-2" rows="6"></textarea>
+    </div>
+
+    <div>
+      <label class="block font-medium">Nahrát nové obrázky</label>
+      <input n:name="images[]" type="file" multiple class="w-full">
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      {foreach $post->images as $img}
+        <div class="relative border rounded">
+          <img src="/uploads/{$img}" alt="" class="w-full h-auto rounded">
+          <a href="{link Post:removeImage id => $post->id, image => $img}" class="absolute top-1 right-1 text-white bg-red-500 p-1 rounded">×</a>
+        </div>
+      {/foreach}
+    </div>
+
+    <div>
+      <button n:name="save" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Uložit změny</button>
+    </div>
+  </form>
+{/block}

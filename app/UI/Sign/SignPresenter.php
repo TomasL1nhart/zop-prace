@@ -2,44 +2,73 @@
 
 namespace App\UI\Sign;
 
-use Nette;
+use App\Model\Authenticator;
 use Nette\Application\UI\Form;
+use Nette\Application\UI\Presenter;
+use Nette\Security\Passwords;
+use Nette\Database\Explorer;
 
-final class SignPresenter extends Nette\Application\UI\Presenter
+class SignPresenter extends Presenter
 {
-	protected function createComponentSignInForm(): Form
-	{
-		$form = new Form;
+    public function __construct(
+        private Explorer $db,
+        private Authenticator $authenticator,
+        private Passwords $passwords,
+    ) {}
 
-		$form->addText('username', 'Uživatelské jméno:')
-			->setRequired('Prosím vyplňte své uživatelské jméno.');
+    public function renderIn(): void {}
 
-		$form->addPassword('password', 'Heslo:')
-			->setRequired('Prosím vyplňte své heslo.');
+    public function renderUp(): void {}
 
-		$form->addSubmit('send', 'Přihlásit');
+    protected function createComponentLoginForm(): Form
+    {
+        $form = new Form;
+        $form->addText('email', 'Email:')->setRequired();
+        $form->addPassword('password', 'Password:')->setRequired();
+        $form->addSubmit('send', 'Sign in');
+        $form->onSuccess[] = [$this, 'loginFormSucceeded'];
+        return $form;
+    }
 
-		// Oprava: správné přiřazení callbacku (bez volání metody)
-		$form->onSuccess[] = [$this, 'signInFormSucceeded'];
+    public function loginFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $this->getUser()->login($values['email'], $values['password']);
+            $this->redirect('Home:default');
+        } catch (\Nette\Security\AuthenticationException $e) {
+            $form->addError('Incorrect credentials.');
+        }
+    }
 
-		return $form;
-	}
+    protected function createComponentRegisterForm(): Form
+    {
+        $form = new Form;
+        $form->addText('email', 'Email:')->setRequired();
+        $form->addPassword('password', 'Password:')->setRequired()->addRule($form::MIN_LENGTH, 'Min. 6 characters', 6);
+        $form->addSubmit('send', 'Sign up');
+        $form->onSuccess[] = [$this, 'registerFormSucceeded'];
+        return $form;
+    }
 
-	public function signInFormSucceeded(Form $form, \stdClass $data): void
-	{
-		try {
-			$this->getUser()->login($data->username, $data->password);
-			$this->redirect('Home:'); // nebo kamkoliv chceš po přihlášení
+    public function registerFormSucceeded(Form $form, array $values): void
+    {
+        $exists = $this->db->table('users')->where('email', $values['email'])->fetch();
+        if ($exists) {
+            $form->addError('Email is already taken.');
+            return;
+        }
+        $this->db->table('users')->insert([
+            'email' => $values['email'],
+            'password' => $this->passwords->hash($values['password']),
+        ]);
+        $this->flashMessage('Registration successful. You can now log in.');
+        $this->redirect('Sign:in');
+    }
 
-		} catch (Nette\Security\AuthenticationException $e) {
-			$form->addError('Nesprávné přihlašovací jméno nebo heslo.');
-		}
-	}
-
-	public function actionOut(): void
-	{
-		$this->getUser()->logout();
-		$this->flashMessage('Odhlášení bylo úspěšné.');
-		$this->redirect('Home:'); // nebo kam chceš po odhlášení
-	}
+    public function actionOut(): void
+    {
+        $this->getUser()->logout(true);
+        $this->flashMessage('You have been signed out.');
+        $this->redirect('Home:default');
+    }
 }

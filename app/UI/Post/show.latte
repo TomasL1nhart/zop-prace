@@ -1,73 +1,32 @@
 {block content}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <h1 class="text-3xl font-bold mb-4">{$post->title}</h1>
+  <p class="text-sm text-gray-600 italic mb-4">Kategorie: {$post->category->name}</p>
 
-<p><a n:href="Home:default">← zpět na výpis příspěvků</a></p>
+  <div class="prose mb-6">{$post->content|noescape}</div>
 
-{ifset $post}
-    <div class="post">
-        <strong>Stav:</strong> 
-        {if $post->status === 'OPEN'}
-            🟢 OTEVŘENÝ
-        {elseif $post->status === 'CLOSED'}
-            🔴 UZAVŘENÝ
-        {elseif $post->status === 'ARCHIVED'}
-            ⚫ ARCHIVOVANÝ
-        {/if}
-    </div>
+  <div class="grid grid-cols-2 gap-4 mb-6">
+    {foreach $post->images as $image}
+      <img src="/uploads/{$image}" alt="Image" class="rounded border">
+    {/foreach}
+  </div>
 
-    <h1>{$post->title}</h1>
-    <p>{$post->content}</p><hr>
+  {if $canEdit}
+    <a href="{link Post:edit id => $post->id}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Editovat</a>
+  {/if}
 
-    <div class="date">{$post->created_at|date:'F j, Y'}</div>
+  <div class="mt-8">
+    <h2 class="text-xl font-semibold mb-2">Komentáře</h2>
+    {foreach $post->comments as $comment}
+      <div class="border-b py-2">
+        <p class="text-sm text-gray-800">{$comment->user->username}: {$comment->content}</p>
+      </div>
+    {/foreach}
 
-    <div class="views">
-        <i class="fa fa-eye"></i> {$post->views_count}
-    </div><br><hr>
-
-    {ifset $post->category}
-        <small>({$post->category->name})</small>
-    {/ifset}
-
-    {snippet image}
-        {if $post->image}
-            <img src="{$basePath}/{$post->image}" alt="Obrázek k článku {$post->title}" width="300">
-            <a n:href="deleteImage! $post->id" class="ajax">Smazat obrázek</a>
-        {else}
-            <img src="{$basePath}/upload/no-image.png" alt="Výchozí obrázek" width="300">
-        {/if}
-    {/snippet}
-
-    {if $post->status !== 'ARCHIVED'}
-        {if $user->isLoggedIn()}
-            <h2>Vložte nový komentář</h2>
-            {control commentForm}
-        {/if}
+    {if $canComment}
+      <form n:form="commentForm" class="mt-4">
+        <textarea n:name="content" class="w-full border rounded p-2" rows="3"></textarea>
+        <button n:name="send" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Odeslat komentář</button>
+      </form>
     {/if}
-
-    {if count($comments) > 0}
-        <h2>Komentáře</h2>
-        <div class="comments">
-            {foreach $comments as $comment}
-                <p>
-                    <b><a href="mailto:{$comment->email}" n:tag-if="$comment->email">{$comment->name}</a></b> napsal:
-                </p>
-                <div>{$comment->content}</div>
-
-                {if $user->isLoggedIn()}
-                    <a n:href="deleteComment! $comment->id" class="btn btn-danger ajax">Smazat komentář</a>
-                {/if}
-            {/foreach}
-        </div>
-    {/if}
-
-    <a n:href="Edit:edit $post->id">Upravit příspěvek</a>
-
-{else}
-    {ifset $notFound}
-        <div class="archived-message">
-            <p class="smiley">:(</p>
-            <p class="text">Někdo asi nechce aby si tenhle post viděl..</p>
-        </div>
-    {/ifset}
-{/ifset}
+  </div>
 {/block}

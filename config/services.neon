@@ -1,13 +1,14 @@
 services:
     - App\Core\RouterFactory::createRouter
     - App\Model\UserFacade
-    - App\UI\Sign\SignPresenter
-    - App\UI\Register\RegisterPresenter
+    - App\Model\PostFacade
+    - App\Model\Authenticator
     - App\Security\AuthorizatorFactory::create
 
-
-
-    security.authenticator: @App\Model\UserFacade
+    - App\UI\Home\HomePresenter
+    - App\UI\Post\PostPresenter
+    - App\UI\Sign\SignPresenter
+    - App\UI\Register\RegisterPresenter
 
 
 

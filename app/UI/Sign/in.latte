@@ -1,4 +1,16 @@
 {block content}
-<h1 n:block=title>Přihlášení</h1>
-
-{control signInForm}
+<h2>Sign in</h2>
+{form loginForm}
+	<div>
+		{label email /}
+		{input email}
+	</div>
+	<div>
+		{label password /}
+		{input password}
+	</div>
+	<div>
+		{input send}
+	</div>
+{/form}
+{/block}

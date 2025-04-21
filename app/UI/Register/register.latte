@@ -1,10 +1,16 @@
 {block content}
-<h1>Registrace</h1>
-
-{control registerForm}
-
-<p>
-    Už máte účet?
-    <a n:href="Sign:in">Přihlásit se</a>
-</p>
+<h2>Sign up</h2>
+{form registerForm}
+	<div>
+		{label email /}
+		{input email}
+	</div>
+	<div>
+		{label password /}
+		{input password}
+	</div>
+	<div>
+		{input send}
+	</div>
+{/form}
 {/block}

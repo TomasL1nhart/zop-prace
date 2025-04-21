@@ -20,7 +20,6 @@ final class RouterFactory
         $router->addRoute('<presenter>/<action>[/<id>]', 'Home:default');
 
         // Definování routy pro kategorie
-        $router->addRoute('game/category/<id>', 'Game:genre'); 
         $router->addRoute('home/category/<id>', 'Home:category');
 
         

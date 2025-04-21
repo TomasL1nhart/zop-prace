@@ -3,59 +3,36 @@
 namespace App\UI\Register;
 
 use App\Model\UserFacade;
-use Nette;
 use Nette\Application\UI\Form;
-use Nette\Security\Passwords;
+use Nette\Application\UI\Presenter;
+use Nette\Utils\Validators;
 
-final class RegisterPresenter extends Nette\Application\UI\Presenter
+final class RegisterPresenter extends Presenter
 {
-    private UserFacade $userFacade;
+    public function __construct(
+        private UserFacade $users,
+    ) {}
 
-    public function __construct(UserFacade $userFacade)
-    {
-        $this->userFacade = $userFacade;
-    }
+    public function renderDefault(): void {}
 
-	protected function createComponentRegisterForm(): Form
+    protected function createComponentRegisterForm(): Form
     {
         $form = new Form;
-
-        $form->addText('username', 'Uživatelské jméno:')
-            ->setRequired('Zadejte uživatelské jméno.');
-
-        $form->addEmail('email', 'E-mail:')
-            ->setRequired('Zadejte platný e-mail.');
-
-        $form->addPassword('password', 'Heslo:')
-            ->setRequired('Zadejte heslo.');
-
-        $form->addPassword('passwordVerify', 'Heslo znovu:')
-            ->setRequired('Zadejte heslo znovu.')
-            ->addRule($form::EQUAL, 'Hesla se neshodují.', $form['password']);
-
-        $form->addSubmit('send', 'Registrovat');
-
-        $form->onSuccess[] = [$this, 'RegisterFormSucceeded'];
-
+        $form->addText('email', 'Email:')->setRequired()->addRule($form::EMAIL);
+        $form->addPassword('password', 'Password:')->setRequired()->addRule($form::MIN_LENGTH, 'At least 6 characters', 6);
+        $form->addSubmit('send', 'Register');
+        $form->onSuccess[] = [$this, 'registerFormSucceeded'];
         return $form;
     }
 
-    public function RegisterFormSucceeded(Form $form, \stdClass $data): void
+    public function registerFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->userFacade->addUser(
-                $data->username,
-                $data->email,
-                $data->password // hashování se děje v UserFacade
-            );
-
-            $this->flashMessage('Registrace byla úspěšná. Můžete se přihlásit.');
-            $this->redirect('Sign:in'); // přesměrování na přihlašovací stránku
-
-        } catch (\RuntimeException $e) {
-            $form->addError($e->getMessage());
+            $this->users->register($values['email'], $values['password']);
+            $this->flashMessage('Registration successful. You can now sign in.');
+            $this->redirect('Sign:in');
         } catch (\Exception $e) {
-            $form->addError('Došlo k chybě při registraci.');
+            $form->addError($e->getMessage());
         }
     }
 }

@@ -9,7 +9,7 @@ application:
 
 
 database:
-	dsn: 'mysql:host=127.0.0.1;dbname=quickstart'
+	dsn: 'mysql:host=127.0.0.1;dbname=zop'
 	user: root
 	password: root
 

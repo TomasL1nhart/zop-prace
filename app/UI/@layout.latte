@@ -1,29 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{block title}Museblog{/block}</title>
 	<link rel="stylesheet" href="{$basePath}/style.css">
-
-	<title>{ifset title}{include title|stripHtml} | {/ifset}Nette Web</title>
+	<style>
+		body {
+			margin: 0;
+			font-family: 'Segoe UI', sans-serif;
+			background: #fafafa;
+			color: #222;
+		}
+		header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 1rem 2rem;
+			background: #fff;
+			box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+		}
+		header h1 a {
+			text-decoration: none;
+			color: #111;
+		}
+		nav a {
+			margin-left: 1.2rem;
+			text-decoration: none;
+			color: #555;
+			font-weight: 500;
+		}
+		nav a:hover {
+			color: #000;
+		}
+		main {
+			padding: 2rem;
+			max-width: 900px;
+			margin: 0 auto;
+		}
+		footer {
+			text-align: center;
+			padding: 1rem;
+			margin-top: 4rem;
+			color: #999;
+			font-size: 0.9rem;
+		}
+	</style>
 </head>
-
 <body>
-	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
+	<header>
+		<h1><a href="{link Home:default}">Museblog</a></h1>
+		<nav>
+			<a href="{link Home:default}">Home</a>
+			{if $user->isLoggedIn()}
+				{if $user->isInRole('producer')}
+					<a href="{link Post:create}">New Post</a>
+				{/if}
+				<a href="{link Sign:out}">Logout</a>
+			{else}
+				<a href="{link Sign:in}">Sign In</a>
+				<a href="{link Register:default}">Register</a>
+			{/if}
+		</nav>
+	</header>
 
-	{include content}
+	<main>
+		{include #content}
+	</main>
 
-	<ul class="navig">
-		<li><a n:href="Home:">Články</a></li>
-		<li><a n:href="Game:">Hry</a></li>
-		{if $user->isLoggedIn()}
-			<li><a n:href="Sign:out">Odhlásit</a></li>
-		{else}
-			<li><a n:href="Sign:in">Přihlásit</a></li>
-		{/if}
-	</ul>
-
-	<script src="https://unpkg.com/naja@3/dist/Naja.min.js"></script>
-	<script> naja.initialize(); </script>
+	<footer>
+		<p>&copy; {=date('Y')} Museblog</p>
+	</footer>
 </body>
 </html>
