@@ -13,9 +13,6 @@ final class PostPresenter extends Presenter
 {
     public function __construct(
         private PostFacade $postFacade,
-        private CommentFacade $commentFacade,
-        private ImageFacade $imageFacade,
-        private CategoryFacade $categoryFacade
     ) {}
 
     public function renderDefault(): void

@@ -10,7 +10,7 @@ class PostFacade
     }
 
     /** POSTS **/
-    public function getAllPosts()
+    public function getAll()
     {
         return $this->database->table('posts')
             ->where('status != ?', 'ARCHIVED')

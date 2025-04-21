@@ -1,6 +1,4 @@
 {block content}
-  <h1 class="text-3xl font-bold mb-6">Museblog</h1>
-
   <div class="grid gap-4">
     {foreach $posts as $post}
       <a href="{link Post:show id => $post->id}" class="block p-4 border rounded hover:bg-gray-50">
@@ -14,7 +12,7 @@
   <div class="mt-6">
     {if !$user->isLoggedIn()}
       <a href="{link Sign:in}" class="text-blue-600 hover:underline mr-4">Sign in</a>
-      <a href="{link Register:default}" class="text-blue-600 hover:underline">Register</a>
+      <a href="{link Register:register}" class="text-blue-600 hover:underline">Register</a>
     {else}
       <span class="text-gray-600">Logged in as <strong>{$user->identity->username}</strong></span>
     {/if}
