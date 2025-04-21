@@ -1,0 +1,73 @@
+{block content}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<p><a n:href="Home:default">← zpět na výpis příspěvků</a></p>
+
+{ifset $post}
+    <div class="post">
+        <strong>Stav:</strong> 
+        {if $post->status === 'OPEN'}
+            🟢 OTEVŘENÝ
+        {elseif $post->status === 'CLOSED'}
+            🔴 UZAVŘENÝ
+        {elseif $post->status === 'ARCHIVED'}
+            ⚫ ARCHIVOVANÝ
+        {/if}
+    </div>
+
+    <h1>{$post->title}</h1>
+    <p>{$post->content}</p><hr>
+
+    <div class="date">{$post->created_at|date:'F j, Y'}</div>
+
+    <div class="views">
+        <i class="fa fa-eye"></i> {$post->views_count}
+    </div><br><hr>
+
+    {ifset $post->category}
+        <small>({$post->category->name})</small>
+    {/ifset}
+
+    {snippet image}
+        {if $post->image}
+            <img src="{$basePath}/{$post->image}" alt="Obrázek k článku {$post->title}" width="300">
+            <a n:href="deleteImage! $post->id" class="ajax">Smazat obrázek</a>
+        {else}
+            <img src="{$basePath}/upload/no-image.png" alt="Výchozí obrázek" width="300">
+        {/if}
+    {/snippet}
+
+    {if $post->status !== 'ARCHIVED'}
+        {if $user->isLoggedIn()}
+            <h2>Vložte nový komentář</h2>
+            {control commentForm}
+        {/if}
+    {/if}
+
+    {if count($comments) > 0}
+        <h2>Komentáře</h2>
+        <div class="comments">
+            {foreach $comments as $comment}
+                <p>
+                    <b><a href="mailto:{$comment->email}" n:tag-if="$comment->email">{$comment->name}</a></b> napsal:
+                </p>
+                <div>{$comment->content}</div>
+
+                {if $user->isLoggedIn()}
+                    <a n:href="deleteComment! $comment->id" class="btn btn-danger ajax">Smazat komentář</a>
+                {/if}
+            {/foreach}
+        </div>
+    {/if}
+
+    <a n:href="Edit:edit $post->id">Upravit příspěvek</a>
+
+{else}
+    {ifset $notFound}
+        <div class="archived-message">
+            <p class="smiley">:(</p>
+            <p class="text">Někdo asi nechce aby si tenhle post viděl..</p>
+        </div>
+    {/ifset}
+{/ifset}
+{/block}

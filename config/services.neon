@@ -1,0 +1,18 @@
+services:
+    - App\Core\RouterFactory::createRouter
+    - App\Model\UserFacade
+    - App\UI\Sign\SignPresenter
+    - App\UI\Register\RegisterPresenter
+    - App\Security\AuthorizatorFactory::create
+
+
+
+    security.authenticator: @App\Model\UserFacade
+
+
+
+search:
+	-	in: %appDir%
+		classes:
+			- *Factory
+			- *Facade

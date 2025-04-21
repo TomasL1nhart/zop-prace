@@ -1,0 +1,42 @@
+{block content}
+<h1>Game List</h1>
+<link rel="stylesheet" href="{$basePath}/style.css">
+
+<h4>Genres: 
+    {foreach $genres as $g}
+        <a n:href="Game:genre, $g->id">{$g->name}</a>{sep} - {/sep}
+    {/foreach}
+</h4>
+<br>
+<ul>
+    {foreach $games as $game}
+        <li>
+            <a n:href="game:show, $game->id"><b>{$game->name}</b></a> - {$game->description} 
+            <b>- Genre: {$game->genre_name}</b>
+            <a href="{$presenter->link('Game:edit', $game->id)}">Edit</a>
+        </li>
+    {/foreach}
+</ul>
+<br>
+
+<h2>Add New Game</h2>
+<form n:name="addGameForm">
+    <div>
+        <label for="name">Name:</label>
+        <input type="text" id="name" n:name="name">
+    </div>
+    <div>
+        <label for="description">Description:</label>
+        <textarea id="description" n:name="description"></textarea>
+    </div>
+    <div>
+        <label for="genre_id">Genre (Select):</label>
+        <select id="genre_id" n:name="genre_id">
+            {foreach $genres as $genre}
+                <option value="{$genre->id}">{$genre->name}</option>
+            {/foreach}
+        </select>
+    </div>
+    <button type="submit" n:name="submit">Add</button>
+</form>
+{/block}

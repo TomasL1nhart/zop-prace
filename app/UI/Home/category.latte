@@ -1,0 +1,23 @@
+{extends "default.latte"}
+<link rel="stylesheet" href="{$basePath}/style.css">
+
+{block content}
+    {if $category}
+        <h1>Příspěvky v kategorii: {$category->name}</h1>
+    {else}
+        <h1>Neznámá kategorie</h1>
+    {/if}
+
+    {if count($posts)}
+        <ul>
+            {foreach $posts as $post}
+                <li>
+                    <a href="{link Home:show, postId => $post->id}">{$post->title}</a>
+                    <small>Publikováno: {$post->created_at|date:'j. n. Y'}</small>
+                </li>
+            {/foreach}
+        </ul>
+    {else}
+        <p>Žádné příspěvky v této kategorii.</p>
+    {/if}
+{/block}

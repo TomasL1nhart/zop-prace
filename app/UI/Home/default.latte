@@ -1,0 +1,102 @@
+{block content}
+<link rel="stylesheet" href="{$basePath}/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<h1>Můj blog</h1>
+
+<div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Hledat podle názvu a kategorie" />
+</div>
+
+<div id="postsContainer">
+    {foreach $posts as $post}
+        <div class="post">
+            <h2>
+                <a href="{link Post:show $post->id}">{$post->title}</a>
+                
+                {if $post->status === 'OPEN'}
+                    <span style="color: green;">🟢</span>
+                {elseif $post->status === 'CLOSED'}
+                    <span style="color: red;">🔴</span>
+                {elseif $post->status === 'ARCHIVED'}
+                    <span style="color: gray;">⚫</span>
+                {/if}
+                
+                {ifset $post->category}
+                    <small>({$post->category->name})</small>
+                {/ifset}
+            </h2>
+            <div class="date">{$post->created_at|date:'F j, Y'}</div>
+            <div>{$post->content|truncate:256}</div>
+
+            <div class="views">
+                <i class="fa fa-eye"></i> {$post->views_count}
+            </div><br>
+
+            {if $post->image}
+                <img src="{$basePath}/{$post->image}" alt="Obrázek k článku {$post->title}" width="200">
+            {else}
+                <img src="{$basePath}/upload/no-image.png" alt="Výchozí obrázek" width="200">
+            {/if}
+        </div>
+    {/foreach}
+</div>
+
+<div class="pagination">
+    {if $paginator->page > 1}
+        <a href="{link this, page => $paginator->page - 1}">Předchozí</a>
+    {/if}
+
+    {for $i = 1; $i <= $paginator->pageCount; $i++}
+        <a href="{link this, page => $i}" n:class="$i === $paginator->page ? active">{if $i === $paginator->page}<strong>{$i}</strong>{else}{$i}{/if}</a>
+    {/for}
+
+    {if $paginator->page < $paginator->pageCount}
+        <a href="{link this, page => $paginator->page + 1}">Další</a>
+    {/if}
+</div>
+
+<a n:href="Edit:create" n:if="$user->isLoggedIn()">Vytvořit příspěvek</a>
+
+<!-- Odkaz pro registraci -->
+<p>
+    Nemáte účet? <a n:href="Register:register">Zaregistrovat se</a>
+</p>
+
+<script>
+    // Dynamické filtrování příspěvků
+    document.getElementById('searchInput').addEventListener('input', function() {
+        var searchValue = this.value.toLowerCase();
+        var posts = document.querySelectorAll('.post');
+
+        posts.forEach(function(post) {
+            var title = post.querySelector('h2 a').innerText.toLowerCase();
+            var category = post.querySelector('.post small') ? post.querySelector('.post small').innerText.toLowerCase() : '';
+            var content = post.querySelector('.post div') ? post.querySelector('.post div').innerText.toLowerCase() : '';
+            var status = post.querySelector('h2 span') ? post.querySelector('h2 span').innerText.toLowerCase() : '';
+
+            // Pokud hledaný výraz je součástí názvu, kategorie, obsahu nebo stavu, zobrazí příspěvek
+            if (title.includes(searchValue) || category.includes(searchValue) || content.includes(searchValue) || status.includes(searchValue)) {
+                post.style.display = 'block';
+            } else {
+                post.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<style>
+    .search-bar input {
+        width: 250px;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .search-bar input:focus {
+        outline: none;
+        border-color: #4CAF50;
+    }
+</style>
+
+{/block}
