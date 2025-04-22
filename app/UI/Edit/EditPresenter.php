@@ -8,95 +8,78 @@ use Nette\Application\UI\Form;
 
 final class EditPresenter extends Nette\Application\UI\Presenter
 {
-    private PostFacade $facade;
-
-    public function __construct(PostFacade $facade)
-    {
-        $this->facade = $facade;
-    }
+    public function __construct(private PostFacade $facade) {}
 
     protected function createComponentPostForm(): Form
     {
         $form = new Form;
+
         $form->addText('title', 'Titulek:')
             ->setRequired();
+
         $form->addTextArea('content', 'Obsah:')
             ->setRequired();
-    
-        $categories = $this->facade->getCategories();
-        $categoryOptions = [];
-        foreach ($categories as $category) {
-            $categoryOptions[$category->id] = $category->name;
-        }
-        
-        $form->addSelect('category_id', 'Kategorie:', $categoryOptions)
+
+            $form->addSelect('category_id', 'Kategorie:', $this->facade->getCategories()->fetchPairs('id', 'name'))
             ->setPrompt('Vyberte kategorii')
             ->setRequired();
-    
-        $statuses = [
-            'OPEN' => 'OTEVŘENÝ',
-            'CLOSED' => 'UZAVŘENÝ',
-            'ARCHIVED' => 'ARCHIVOVANÝ'
-        ];
-        $form->addSelect('status', 'Stav:', $statuses)
-            ->setDefaultValue('OPEN');
-    
-        $form->addUpload('image', 'Soubor')
-            ->addRule(Form::IMAGE, 'Thumbnail must be JPEG, PNG or GIF');
-    
-        $form->addSubmit('send', 'Uložit a publikovat');
-        $form->onSuccess[] = $this->postFormSucceeded(...);
-    
-        return $form;
-    }    
 
-    private function postFormSucceeded(array $data): void
+        $form->addSelect('status', 'Stav:', [
+            'OPENED' => 'Otevřený',
+            'CLOSED' => 'Uzavřený',
+            'ARCHIVED' => 'Archivovaný',
+        ]);
+
+        $form->addUpload('image', 'Obrázek')
+            ->addRule(Form::IMAGE, 'Obrázek musí být JPEG, PNG nebo GIF');
+
+        $form->addSubmit('send', 'Uložit');
+
+        $form->onSuccess[] = $this->postFormSucceeded(...);
+
+        return $form;
+    }
+
+    public function renderEdit(?int $id = null): void
+    {
+        if ($id) {
+            $post = $this->facade->getPostById($id, $this->getUser());
+            if (!$post) {
+                $this->error('Příspěvek nebyl nalezen.');
+            }
+            $this['postForm']->setDefaults($post->toArray());
+            $this->template->post = $post;
+        }
+    }
+
+    private function postFormSucceeded(Form $form, \stdClass $values): void
     {
         $id = $this->getParameter('id');
-    
-        if (!empty($data['image']) && $data['image']->isOk()) {
-            $image = $data['image'];
-            $imagePath = 'upload/' . $image->getSanitizedName();
-            $image->move($imagePath);
-            $data['image'] = $imagePath;
+        $data = (array) $values;
+
+        if ($values->image->isOk()) {
+            $filename = 'www/uploads/' . $values->image->getSanitizedName();
+            $values->image->move($filename);
+            $data['image'] = str_replace('www/', '', $filename); // ukládáme relativní cestu
         } else {
             unset($data['image']);
         }
-    
+
         if ($id) {
             $this->facade->updatePost($id, $data);
-            $this->flashMessage('Příspěvek byl úspěšně aktualizován.', 'success');
+            $this->flashMessage('Příspěvek byl aktualizován.', 'success');
         } else {
             $post = $this->facade->createPost($data);
             $id = $post->id;
-            $this->flashMessage('Příspěvek byl úspěšně publikován.', 'success');
+            $this->flashMessage('Příspěvek byl vytvořen.', 'success');
         }
-    
-        $this->redirect('Post:show', $id);
-    }    
 
-    public function renderEdit(int $id): void
-    {
-        $post = $this->facade->getPostById($id, $this->getUser());
-    
-        if (!$post) {
-            $this->error('Post not found');
-        }
-    
-        if ($post->status === 'ARCHIVED' && !$this->getUser()->isLoggedIn()) {
-            $this->template->archived = true;
-            return;
-        }
-    
-        $this->getComponent('postForm')->setDefaults($post->toArray());
-        $this->template->post = $post;
+        $this->redirect('Post:show', $id);
     }
-    
 
     public function startup(): void
     {
         parent::startup();
-
         if (!$this->getUser()->isLoggedIn()) {
             $this->redirect('Sign:in');
         }

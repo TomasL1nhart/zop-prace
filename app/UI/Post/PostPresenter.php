@@ -1,114 +1,135 @@
 <?php
+
 namespace App\UI\Post;
 
 use App\Model\PostFacade;
-use Nette\Application\UI\Presenter;
+use Nette;
 use Nette\Application\UI\Form;
-use Nette\Security\AuthenticationException;
-use Nette\Utils\Strings;
-use Nette\Utils\Validators;
-use Nette\Http\FileUpload;
 
-final class PostPresenter extends Presenter
+final class PostPresenter extends Nette\Application\UI\Presenter
 {
-    public function __construct(
-        private PostFacade $postFacade,
-    ) {}
-
-    public function renderDefault(): void
-    {
-        $this->template->posts = $this->postFacade->getVisiblePosts($this->getUser());
-    }
+    public function __construct(private PostFacade $facade) {}
 
     public function renderShow(int $id): void
     {
-        $post = $this->postFacade->getById($id);
+        $post = $this->facade->getPostById($id, $this->getUser());
+    
         if (!$post) {
-            $this->error('Příspěvek nebyl nalezen.');
+            $this->template->notFound = true;
+            return;
         }
-
-        $user = $this->getUser();
-        $isOwner = $user->isLoggedIn() && $user->getId() === $post->author_id;
-        $isAdmin = $user->isInRole('admin');
-
-        if ($post->status === 'ARCHIVED' && !$isOwner && !$isAdmin) {
-            $this->error('Tento příspěvek je archivovaný.');
+    
+        if ($post->status === 'ARCHIVED' && !$this->getUser()->isLoggedIn()) {
+            $this->template->archived = true;
+            return;
         }
-
-        if ($post->status === 'CLOSED' && !$isOwner && !$isAdmin) {
-            $this->template->commentsAllowed = false;
-        } elseif ($post->status === 'OPENED') {
-            $this->template->commentsAllowed = $user->isLoggedIn() && $user->isInRole('user') || $user->isInRole('producer') || $isAdmin;
-        } else {
-            $this->template->commentsAllowed = $isOwner || $isAdmin;
-        }
-
-        $this->template->canEdit = $isAdmin || ($user->isInRole('producer') && $isOwner);
+    
         $this->template->post = $post;
-        $this->template->comments = $this->commentFacade->getByPost($id);
-        $this->template->images = $this->imageFacade->getByPost($id);
+        $this->template->comments = $this->facade->getComments($id);
     }
-
-    public function renderEdit(int $id): void
+    public function renderCreate(): void
     {
-        $post = $this->postFacade->getById($id);
-        if (!$post) {
-            $this->error('Příspěvek nebyl nalezen.');
-        }
-
-        $user = $this->getUser();
-        $isAdmin = $user->isInRole('admin');
-        $isOwner = $user->isLoggedIn() && $user->getId() === $post->author_id;
-
-        if (!$isAdmin && !($user->isInRole('producer') && $isOwner)) {
-            $this->error('Nemáte oprávnění upravit tento příspěvek.');
-        }
-
-        $this['postForm']->setDefaults($post);
-        $this->template->images = $this->imageFacade->getByPost($id);
-        $this->template->postId = $id;
-    }
+        $this->template->categories = $this->facade->getCategories();
+    }    
 
     protected function createComponentPostForm(): Form
     {
         $form = new Form;
-        $form->addText('title', 'Nadpis')->setRequired();
-        $form->addTextArea('content', 'Obsah')->setRequired();
-        $form->addSelect('category_id', 'Kategorie', $this->categoryFacade->getPairs())->setPrompt('Vyberte kategorii');
-        $form->addSelect('status', 'Stav', [
-            'OPENED' => 'Otevřený',
-            'CLOSED' => 'Uzavřený',
-            'ARCHIVED' => 'Archivovaný'
-        ])->setRequired();
-        $form->addUpload('images[]', 'Obrázky')->setHtmlAttribute('multiple', true);
-        $form->addSubmit('save', 'Uložit');
 
-        $form->onSuccess[] = function (Form $form, array $values): void {
-            $user = $this->getUser();
-            $id = $this->getParameter('id');
+        $form->addText('title', 'Nadpis:')
+            ->setRequired();
 
-            if ($id) {
-                $this->postFacade->update($id, $values);
-                $this->imageFacade->handleUpload($id, $form['images']->getValue());
-                $this->flashMessage('Příspěvek upraven.', 'success');
-            } else {
-                if (!$user->isLoggedIn() || !$user->isInRole('producer') && !$user->isInRole('admin')) {
-                    $this->error('Nemáte oprávnění vytvořit příspěvek.');
-                }
-                $postId = $this->postFacade->create($values, $user->getId());
-                $this->imageFacade->handleUpload($postId, $form['images']->getValue());
-                $this->flashMessage('Příspěvek vytvořen.', 'success');
-            }
-            $this->redirect('default');
-        };
+        $form->addTextArea('content', 'Obsah:')
+            ->setRequired();
 
+            $form->addSelect('status', 'Stav:', [
+                'OPENED' => 'Otevřený',
+                'CLOSED' => 'Uzavřený',
+                'ARCHIVED' => 'Archivovaný',
+            ])->setRequired();
+            
+
+        $form->addSelect('category_id', 'Kategorie:', $this->facade->getCategories()->fetchPairs('id', 'name'))
+            ->setPrompt('Vyberte kategorii')
+            ->setRequired();
+
+        $form->addUpload('image', 'Obrázek:')
+            ->setRequired(false)
+            ->addRule($form::IMAGE, 'Soubor musí být obrázek.');
+
+        $form->addSubmit('save', 'Vytvořit příspěvek');
+
+        $form->onSuccess[] = $this->postFormSucceeded(...);
         return $form;
     }
 
-    public function handleDeleteImage(int $id): void
+    private function postFormSucceeded(Form $form, \stdClass $values): void
     {
-        $this->imageFacade->delete($id);
-        $this->flashMessage('Obrázek byl smazán.');
+        $imageName = null;
+    
+        if ($values->image && $values->image->isOk() && $values->image->isImage()) {
+            $imageName = uniqid() . '_' . $values->image->getSanitizedName();
+            $values->image->move(__DIR__ . '/../../../www/uploads/' . $imageName);
+        }
+    
+        $this->facade->createPost([
+            'title' => $values->title,
+            'content' => $values->content,
+            'status' => $values->status,
+            'category_id' => $values->category_id,
+            'image' => $imageName,
+            'user_id' => $this->getUser()->getId(), // ⬅ Přidáno
+        ]);
+    
+        $this->flashMessage('Příspěvek byl úspěšně vytvořen.', 'success');
+        $this->redirect('Home:default');
+    }
+    
+
+    protected function createComponentCommentForm(): Form
+    {
+        if (!$this->getUser()->isLoggedIn()) {
+            throw new Nette\Application\ForbiddenRequestException('Musíte být přihlášeni, abyste mohli komentovat.');
+        }
+    
+        $form = new Form;
+        $form->addTextArea('comment', 'Komentář:')
+            ->setRequired('Zadejte prosím komentář.');
+    
+        $form->addSubmit('send', 'Odeslat komentář');
+    
+        $form->onSuccess[] = $this->commentFormSucceeded(...);
+        return $form;
+    }
+    
+    private function commentFormSucceeded(Form $form, \stdClass $values): void
+    {
+        $postId = (int) $this->getParameter('id');
+        $userId = $this->getUser()->getId();
+    
+        $this->facade->addComment($postId, $userId, $values->comment); // ← Opraveno z $values->content
+    
+        $this->flashMessage('Komentář byl přidán.', 'success');
+        $this->redirect('this');
+    }
+    
+
+    public function handleDeleteImage(int $postId): void
+    {
+        $post = $this->facade->getPostById($postId);
+        if ($post && $post->image && file_exists('www/' . $post->image)) {
+            unlink('www/' . $post->image);
+            $this->facade->updatePost($postId, ['image' => null]);
+            $this->flashMessage('Obrázek byl smazán.', 'success');
+        }
+
+        $this->redirect('this');
+    }
+
+    public function handleDeleteComment(int $commentId): void
+    {
+        $this->facade->deleteComment($commentId);
+        $this->flashMessage('Komentář smazán.', 'success');
         $this->redirect('this');
     }
 }

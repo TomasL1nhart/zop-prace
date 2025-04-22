@@ -1,32 +1,43 @@
 {block content}
-  <h1 class="text-3xl font-bold mb-4">{$post->title}</h1>
-  <p class="text-sm text-gray-600 italic mb-4">Kategorie: {$post->category->name}</p>
+<div class="post-container">
 
-  <div class="prose mb-6">{$post->content|noescape}</div>
+    <h1 class="post-title">{$post->title}</h1>
+    <h2 class="post-author">Autor: {$post->user->username}</h2>
+    <p class="post-category">Kategorie: {$post->ref('categories', 'category_id')->name}</p>
 
-  <div class="grid grid-cols-2 gap-4 mb-6">
-    {foreach $post->images as $image}
-      <img src="/uploads/{$image}" alt="Image" class="rounded border">
-    {/foreach}
-  </div>
+    <hr class="post-separator">
 
-  {if $canEdit}
-    <a href="{link Post:edit id => $post->id}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Editovat</a>
-  {/if}
+    <div class="post-content-box">
+        {$post->content}
+    </div>
 
-  <div class="mt-8">
-    <h2 class="text-xl font-semibold mb-2">Komentáře</h2>
-    {foreach $post->comments as $comment}
-      <div class="border-b py-2">
-        <p class="text-sm text-gray-800">{$comment->user->username}: {$comment->content}</p>
-      </div>
-    {/foreach}
-
-    {if $canComment}
-      <form n:form="commentForm" class="mt-4">
-        <textarea n:name="content" class="w-full border rounded p-2" rows="3"></textarea>
-        <button n:name="send" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Odeslat komentář</button>
-      </form>
+    {if $post->image}
+        <div class="post-image-wrapper">
+            <img src="{$basePath}/uploads/{$post->image}" alt="Obrázek k příspěvku" class="post-image" />
+        </div>
     {/if}
-  </div>
+    <br><br>
+    <hr class="post-separator">
+    {if $user->isLoggedIn()}
+    <a href="{link Edit:edit id => $post->id}" class="post-btn">✏️ Upravit</a>
+
+    {/if}
+    <h2 class="comments-title">Komentáře</h2>
+
+    {foreach $comments as $comment}
+        <div class="comment-box">
+            <strong>{$comment->user->username}</strong>
+            <p>{$comment->text}</p>
+        </div>
+    {/foreach}
+
+    {if $user->isLoggedIn()}
+        <form n:name="commentForm" class="comment-form">
+            <textarea n:name="comment" class="comment-textarea" placeholder="Napište svůj komentář..." rows="4"></textarea>
+          <button type="submit" class="post-btn">Odeslat</button>
+
+        </form>
+    {/if}
+
+</div>
 {/block}

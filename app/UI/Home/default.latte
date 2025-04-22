@@ -1,20 +1,28 @@
 {block content}
-  <div class="grid gap-4">
+<div class="grid gap-6">
     {foreach $posts as $post}
-      <a href="{link Post:show id => $post->id}" class="block p-4 border rounded hover:bg-gray-50">
-        <h2 class="text-xl font-semibold">{$post->title}</h2>
-        <p class="text-sm text-gray-600 italic">{$post->category->name}</p>
-        <p class="mt-2 text-gray-800">{=implode(' ', array_slice(explode(' ', strip_tags($post->content)), 0, 6))}...</p>
-      </a>
-    {/foreach}
-  </div>
+        <div class="post-card">
+            <h3><a href="{link Post:show id => $post->id}">{$post->title}</a></h3>
 
-  <div class="mt-6">
+            <div class="text-sm text-gray-500 mb-1">
+                Kategorie: {$post->ref('categories', 'category_id')->name}
+            </div>
+
+            <p class="mt-2 text-gray-800">
+                {=implode(' ', array_slice(explode(' ', strip_tags($post->content)), 0, 25))}...
+            </p>
+
+          <a href="{link Post:show id => $post->id}" class="btn mt-3">Číst více</a>
+        </div>
+    {/foreach}
+</div>
+
+<div class="mt-6">
     {if !$user->isLoggedIn()}
-      <a href="{link Sign:in}" class="text-blue-600 hover:underline mr-4">Sign in</a>
-      <a href="{link Register:register}" class="text-blue-600 hover:underline">Register</a>
+        <a href="{link Sign:in}" class="text-blue-600 hover:underline mr-4">Přihlásit se</a>
+        <a href="{link Register:register}" class="text-blue-600 hover:underline">Registrovat se</a>
     {else}
-      <span class="text-gray-600">Logged in as <strong>{$user->identity->username}</strong></span>
+        <span class="text-gray-600">Přihlášen jako <strong>{$user->identity->username}</strong></span>
     {/if}
-  </div>
+</div>
 {/block}

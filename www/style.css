@@ -11,6 +11,7 @@ header, footer {
 	background: #fff;
 	padding: 1em 2em;
 	box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+	text-decoration: none;
 }
 
 header h1 a {
@@ -62,3 +63,144 @@ input[type=submit] {
 	padding: 0.7em 1.5em;
 	border-radius: 4px;
 }
+
+/* Odkazy (včetně nadpisů příspěvků) */
+a {
+	color: #2c3e50;
+	text-decoration: none;
+	transition: color 0.3s ease;
+
+}
+
+a:hover {
+	color: #2f4257;
+	text-decoration: none;
+
+}
+
+/* Tlačítka */
+.btn {
+	background-color: #2c3e50;
+	color: #fff;
+	padding: 0.6em 1.4em;
+	border-radius: 6px;
+	text-decoration: none;
+	font-weight: 500;
+	display: inline-block;
+	margin-top: 1em;
+	transition: background-color 0.3s ease, transform 0.2s ease;
+	text-decoration: none;
+}
+
+.btn:hover {
+	background-color: #1a242f;
+	transform: translateY(-1px);
+	color: #fff;
+	text-decoration: none;
+}
+
+/* Karta příspěvku */
+.post-card {
+	padding: 1.5em;
+	background-color: #fff;
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.post-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.post-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.post-category {
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+.post-separator {
+    border: none;
+    border-top: 1px solid #9b9b9b;
+    margin: 1.5rem 0;
+}
+
+.post-content-box {
+    background: #f0f0f0;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+}
+
+.post-image-wrapper {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.post-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.post-btn {
+    background-color: #1f2937;
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 2rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s ease;
+	text-decoration: none;
+}
+
+.post-btn:hover {
+    background-color: #111827;
+	color: rgb(253, 255, 212);
+	text-decoration: none;
+}
+
+.comments-title {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.comment-box {
+    background: #f1f1f1;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.comment-form {
+    margin-top: 1.5rem;
+}
+
+.comment-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    margin-bottom: 0.5rem;
+}
+
+

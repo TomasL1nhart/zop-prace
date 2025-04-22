@@ -23,7 +23,7 @@ class SignPresenter extends Presenter
     protected function createComponentLoginForm(): Form
     {
         $form = new Form;
-        $form->addText('email', 'Email:')->setRequired();
+        $form->addText('username', 'Username:') ->setRequired();
         $form->addPassword('password', 'Password:')->setRequired();
         $form->addSubmit('send', 'Sign in');
         $form->onSuccess[] = [$this, 'loginFormSucceeded'];
@@ -33,7 +33,7 @@ class SignPresenter extends Presenter
     public function loginFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->getUser()->login($values['email'], $values['password']);
+            $this->getUser()->login($values['username'], $values['password']);
             $this->redirect('Home:default');
         } catch (\Nette\Security\AuthenticationException $e) {
             $form->addError('Incorrect credentials.');

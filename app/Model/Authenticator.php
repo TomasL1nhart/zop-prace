@@ -15,14 +15,22 @@ class Authenticator implements NetteAuthenticator
         private Passwords $passwords,
     ) {}
 
-    public function authenticate(string $email, string $password): Identity
+    public function authenticate(string $username, string $password): Identity
     {
-        $row = $this->db->table('users')->where('email', $email)->fetch();
+        $row = $this->db->table('users')->where('username', $username)->fetch();
 
         if (!$row || !$this->passwords->verify($password, $row->password)) {
             throw new AuthenticationException('Invalid credentials.');
         }
 
-        return new Identity($row->id, [], ['email' => $row->email]);
+        return new Identity(
+            $row->id,
+            [$row->role], // role jako pole pro Nette\Security
+            [
+                'username' => $row->username,
+                'email' => $row->email,
+                'role' => $row->role,
+            ]
+        );
     }
 }
