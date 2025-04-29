@@ -33,12 +33,40 @@ class SignPresenter extends Presenter
     public function loginFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->getUser()->login($values['username'], $values['password']);
+            // najdi uživatele podle jména
+            $userRow = $this->db->table('users')->where('username', $values['username'])->fetch();
+            
+            if (!$userRow) {
+                throw new \Nette\Security\AuthenticationException('User not found.');
+            }
+    
+            // ověř heslo
+            if (!$this->passwords->verify($values['password'], $userRow->password)) {
+                throw new \Nette\Security\AuthenticationException('Invalid password.');
+            }
+    
+            // update last_login
+            $userRow->update([
+                'last_login' => new \DateTime()
+            ]);
+    
+            // přihlášení
+            $identityData = $userRow->toArray();
+            unset($identityData['password']); // neukládej heslo do identity
+    
+            $this->getUser()->login(new \Nette\Security\Identity(
+                $userRow->id,
+                $userRow->role,
+                $identityData
+            ));
+    
             $this->redirect('Home:default');
+    
         } catch (\Nette\Security\AuthenticationException $e) {
             $form->addError('Incorrect credentials.');
         }
     }
+    
 
     protected function createComponentRegisterForm(): Form
     {

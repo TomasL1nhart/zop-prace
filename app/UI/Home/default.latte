@@ -13,7 +13,6 @@
     </select>
 </form>
 
-<!-- Výpis příspěvků -->
 <div class="grid gap-6">
     {foreach $posts as $post}
         <div class="post-card">
@@ -23,16 +22,22 @@
                 Kategorie: {$post->ref('categories', 'category_id')->name}
             </div>
 
-            <p class="mt-2 text-gray-800">
-                {=implode(' ', array_slice(explode(' ', strip_tags($post->content)), 0, 25))}...
-            </p>
-
+            {=implode(' ', array_slice(explode(' ', strip_tags($post->content)), 0, 25))}...
+            <br>
+            Stav:
+            {if $post->status === 'OPENED'}
+            <span style="color: green; font-weight: bold;">Otevřený</span>
+             {elseif $post->status === 'CLOSED'}
+            <span style="color: orange; font-weight: bold;">Uzavřený</span>
+            {elseif $post->status === 'ARCHIVED'}
+            <span style="color: gray; font-weight: bold;">Archivovaný</span>
+            {/if}
+            <br>
             <a href="{link Post:show id => $post->id}" class="btn mt-3">Číst více</a>
         </div>
     {/foreach}
 </div>
 
-<!-- Stránkování -->
 <div class="pagination">
     {if $paginator->getPage() > 1}
         <a href="{link this, page => $paginator->getPage() - 1, category => $selectedCategory}">&laquo; Předchozí</a>
@@ -47,7 +52,6 @@
     {/if}
 </div>
 
-<!-- Přihlášení info -->
 <div class="mt-6">
     {if !$user->isLoggedIn()}
         <a href="{link Sign:in}" class="text-blue-600 hover:underline mr-4">Přihlásit se</a><br>
