@@ -14,19 +14,22 @@ final class PostPresenter extends Nette\Application\UI\Presenter
     {
         $post = $this->facade->getPostById($id, $this->getUser());
     
-        if (!$post) {
-            $this->template->notFound = true;
+        // Pokud je archivovaný a uživatel není přihlášený
+        if ($post && $post->status === 'ARCHIVED' && !$this->getUser()->isLoggedIn()) {
+            $this->template->isArchivedAndRestricted = true;
             return;
         }
     
-        if ($post->status === 'ARCHIVED' && !$this->getUser()->isLoggedIn()) {
-            $this->template->archived = true;
+        if (!$post) {
+            $this->template->notFound = true;
             return;
         }
     
         $this->template->post = $post;
         $this->template->comments = $this->facade->getComments($id);
     }
+    
+    
     public function renderCreate(): void
     {
         $this->template->categories = $this->facade->getCategories();
@@ -78,7 +81,7 @@ final class PostPresenter extends Nette\Application\UI\Presenter
             'status' => $values->status,
             'category_id' => $values->category_id,
             'image' => $imageName,
-            'user_id' => $this->getUser()->getId(), // ⬅ Přidáno
+            'user_id' => $this->getUser()->getId(),
         ]);
     
         $this->flashMessage('Příspěvek byl úspěšně vytvořen.', 'success');
@@ -107,7 +110,7 @@ final class PostPresenter extends Nette\Application\UI\Presenter
         $postId = (int) $this->getParameter('id');
         $userId = $this->getUser()->getId();
     
-        $this->facade->addComment($postId, $userId, $values->comment); // ← Opraveno z $values->content
+        $this->facade->addComment($postId, $userId, $values->comment);
     
         $this->flashMessage('Komentář byl přidán.', 'success');
         $this->redirect('this');
@@ -132,4 +135,38 @@ final class PostPresenter extends Nette\Application\UI\Presenter
         $this->flashMessage('Komentář smazán.', 'success');
         $this->redirect('this');
     }
+
+    public function handleDelete(int $id): void
+    {
+    $post = $this->facade->getPostById($id);
+    if (!$post) {
+        $this->error('Příspěvek nebyl nalezen.');
+    }
+
+    // Kontrola oprávnění – např. vlastník nebo admin
+    if ($post->user_id !== $this->getUser()->getId()) {
+        $this->error('Nemáte oprávnění mazat tento příspěvek.');
+    }
+
+    // Smazání příspěvku i případného obrázku
+    if ($post->image && file_exists("www/uploads/{$post->image}")) {
+        unlink("www/uploads/{$post->image}");
+    }
+
+    $this->facade->deletePost($id);
+    $this->flashMessage('Příspěvek byl smazán.', 'success');
+    $this->redirect('Home:default');
+    }
+     
+    protected function createComponentDeleteForm(): \Nette\Application\UI\Form
+{
+    $form = new \Nette\Application\UI\Form();
+    $form->addSubmit('delete', 'Smazat');
+    $form->onSuccess[] = function () {
+        $this->handleDelete((int) $this->getParameter('id'));
+    };
+    return $form;
+}
+
+
 }

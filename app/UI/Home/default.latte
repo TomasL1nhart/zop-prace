@@ -1,4 +1,19 @@
 {block content}
+
+<!-- Filtrování podle kategorie -->
+<form method="get" class="filter-form mb-6">
+    <label for="category" class="filter-label">Filtrovat podle kategorie:</label>
+    <select name="category" id="category" class="filter-select" onchange="this.form.submit()">
+        <option value="">-- Všechny kategorie --</option>
+        {foreach $categories as $cat}
+            <option value="{$cat->id}" {if $selectedCategory == $cat->id}selected{/if}>
+                {$cat->name}
+            </option>
+        {/foreach}
+    </select>
+</form>
+
+<!-- Výpis příspěvků -->
 <div class="grid gap-6">
     {foreach $posts as $post}
         <div class="post-card">
@@ -12,17 +27,34 @@
                 {=implode(' ', array_slice(explode(' ', strip_tags($post->content)), 0, 25))}...
             </p>
 
-          <a href="{link Post:show id => $post->id}" class="btn mt-3">Číst více</a>
+            <a href="{link Post:show id => $post->id}" class="btn mt-3">Číst více</a>
         </div>
     {/foreach}
 </div>
 
+<!-- Stránkování -->
+<div class="pagination">
+    {if $paginator->getPage() > 1}
+        <a href="{link this, page => $paginator->getPage() - 1, category => $selectedCategory}">&laquo; Předchozí</a>
+    {/if}
+
+    {for $i = 1; $i <= $paginator->getPageCount(); $i++}
+        <a href="{link this, page => $i, category => $selectedCategory}" class="{if $i === $paginator->getPage()}active{/if}">{$i}</a>
+    {/for}
+
+    {if $paginator->getPage() < $paginator->getPageCount()}
+        <a href="{link this, page => $paginator->getPage() + 1, category => $selectedCategory}">Další &raquo;</a>
+    {/if}
+</div>
+
+<!-- Přihlášení info -->
 <div class="mt-6">
     {if !$user->isLoggedIn()}
-        <a href="{link Sign:in}" class="text-blue-600 hover:underline mr-4">Přihlásit se</a>
+        <a href="{link Sign:in}" class="text-blue-600 hover:underline mr-4">Přihlásit se</a><br>
         <a href="{link Register:register}" class="text-blue-600 hover:underline">Registrovat se</a>
     {else}
         <span class="text-gray-600">Přihlášen jako <strong>{$user->identity->username}</strong></span>
     {/if}
 </div>
+
 {/block}

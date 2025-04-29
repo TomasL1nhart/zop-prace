@@ -14,6 +14,14 @@ header, footer {
 	text-decoration: none;
 }
 
+.alert {
+    padding: 15px;
+    font-style: italic;
+    margin-top: 20px;
+	font-weight: bold;
+	font-size: 1.6em;
+}
+
 header h1 a {
 	text-decoration: none;
 	color: #000;
@@ -203,4 +211,59 @@ a:hover {
     margin-bottom: 0.5rem;
 }
 
+.pagination {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.pagination a {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 8px 14px;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.pagination a:hover {
+    background-color: #e0e0e0;
+}
+
+.pagination a.active {
+    background-color: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-label {
+    font-weight: bold;
+    color: #374151;
+}
+
+.filter-select {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    background-color: #f9fafb;
+    color: #111827;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.filter-select:hover,
+.filter-select:focus {
+    border-color: #2563eb;
+    outline: none;
+}
 

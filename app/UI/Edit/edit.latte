@@ -2,7 +2,7 @@
 <div class="form-container">
     <h1>Upravit příspěvek</h1>
 
-    {form postForm}
+    {form postForm, enctype => "multipart/form-data"}
         <div class="form-group">
             <label for="title">Titulek</label>
             {input title class => 'form-control'}

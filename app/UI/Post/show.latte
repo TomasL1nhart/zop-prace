@@ -1,14 +1,33 @@
 {block content}
 <div class="post-container">
 
+    {ifset $isArchivedAndRestricted}
+    <p class="alert">Tento příspěvek je archivovaný a není veřejně dostupný.</p>
+
+    {elseifset $notFound}
+        <p class="alert">Příspěvek nebyl nalezen.</p>
+
+    {else}
     <h1 class="post-title">{$post->title}</h1>
     <h2 class="post-author">Autor: {$post->user->username}</h2>
+    
+    <div class="post-status">
+        Stav: 
+        {if $post->status === 'OPENED'}
+            <span style="color: green; font-weight: bold;">Otevřený</span>
+        {elseif $post->status === 'CLOSED'}
+            <span style="color: orange; font-weight: bold;">Uzavřený</span>
+        {elseif $post->status === 'ARCHIVED'}
+            <span style="color: gray; font-weight: bold;">Archivovaný</span>
+        {/if}
+    </div>
+    
     <p class="post-category">Kategorie: {$post->ref('categories', 'category_id')->name}</p>
 
     <hr class="post-separator">
 
     <div class="post-content-box">
-        {$post->content}
+        {nl2br($post->content)|noescape}
     </div>
 
     {if $post->image}
@@ -16,12 +35,13 @@
             <img src="{$basePath}/uploads/{$post->image}" alt="Obrázek k příspěvku" class="post-image" />
         </div>
     {/if}
-    <br><br>
-    <hr class="post-separator">
-    {if $user->isLoggedIn()}
-    <a href="{link Edit:edit id => $post->id}" class="post-btn">✏️ Upravit</a>
 
+    <hr class="post-separator">
+
+    {if $user->isLoggedIn()}
+        <a href="{link Edit:edit id => $post->id}" class="post-btn">✏️ Upravit</a>
     {/if}
+
     <h2 class="comments-title">Komentáře</h2>
 
     {foreach $comments as $comment}
@@ -34,10 +54,18 @@
     {if $user->isLoggedIn()}
         <form n:name="commentForm" class="comment-form">
             <textarea n:name="comment" class="comment-textarea" placeholder="Napište svůj komentář..." rows="4"></textarea>
-          <button type="submit" class="post-btn">Odeslat</button>
-
+            <button type="submit" class="post-btn">Odeslat</button>
         </form>
     {/if}
+
+    {if $user->isLoggedIn() && $user->id === $post->user_id}
+        <form n:name="deleteForm" style="margin-top: 20px;">
+            <button class="btn btn-danger" onclick="return confirm('Opravdu chcete smazat tento příspěvek?');">
+                Smazat příspěvek
+            </button>
+        </form>
+    {/if}
+{/ifset}
 
 </div>
 {/block}

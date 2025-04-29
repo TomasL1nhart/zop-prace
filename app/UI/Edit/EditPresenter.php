@@ -20,7 +20,7 @@ final class EditPresenter extends Nette\Application\UI\Presenter
         $form->addTextArea('content', 'Obsah:')
             ->setRequired();
 
-            $form->addSelect('category_id', 'Kategorie:', $this->facade->getCategories()->fetchPairs('id', 'name'))
+        $form->addSelect('category_id', 'Kategorie:', $this->facade->getCategories()->fetchPairs('id', 'name'))
             ->setPrompt('Vyberte kategorii')
             ->setRequired();
 
@@ -30,10 +30,10 @@ final class EditPresenter extends Nette\Application\UI\Presenter
             'ARCHIVED' => 'Archivovaný',
         ]);
 
-        $form->addUpload('image', 'Obrázek')
+        $form->addUpload('image', 'Obrázek:')
             ->addRule(Form::IMAGE, 'Obrázek musí být JPEG, PNG nebo GIF');
 
-        $form->addSubmit('send', 'Uložit');
+        $form->addSubmit('send', 'Uložit')->setHtmlAttribute('class', 'btn');
 
         $form->onSuccess[] = $this->postFormSucceeded(...);
 
@@ -47,7 +47,11 @@ final class EditPresenter extends Nette\Application\UI\Presenter
             if (!$post) {
                 $this->error('Příspěvek nebyl nalezen.');
             }
-            $this['postForm']->setDefaults($post->toArray());
+
+            // Předvyplníme formulář bez image
+            $defaults = $post->toArray();
+            unset($defaults['image']);
+            $this['postForm']->setDefaults($defaults);
             $this->template->post = $post;
         }
     }
@@ -57,12 +61,13 @@ final class EditPresenter extends Nette\Application\UI\Presenter
         $id = $this->getParameter('id');
         $data = (array) $values;
 
+        // Pokud byl nahrán nový obrázek
         if ($values->image->isOk()) {
-            $filename = 'www/uploads/' . $values->image->getSanitizedName();
-            $values->image->move($filename);
-            $data['image'] = str_replace('www/', '', $filename); // ukládáme relativní cestu
+            $filename = uniqid() . '_' . $values->image->getSanitizedName();
+            $values->image->move(__DIR__ . '/../../../www/uploads/' . $filename);
+            $data['image'] = $filename;
         } else {
-            unset($data['image']);
+            unset($data['image']); // Zachováme starý obrázek (nepřepíšeme NULLem)
         }
 
         if ($id) {

@@ -5,6 +5,7 @@ namespace App\UI\Home;
 use App\Model\PostFacade;
 use Nette;
 use Nette\Application\UI\Presenter;
+use Nette\Utils\Paginator;
 
 final class HomePresenter extends Presenter
 {
@@ -16,8 +17,27 @@ final class HomePresenter extends Presenter
         $this->postFacade = $postFacade;
     }
 
-    public function renderDefault(): void
+    public function renderDefault(int $page = 1, $category = null): void
     {
-        $this->template->posts = $this->postFacade->getPublicArticles($this->getUser());
-    }
+        $categoryId = is_numeric($category) ? (int) $category : null;
+    
+        $paginator = new Paginator;
+        $paginator->setItemsPerPage(4);
+        $paginator->setPage($page);
+    
+        $user = $this->getUser();
+    
+        $paginator->setItemCount($this->postFacade->getPublicArticlesCount($user, $categoryId));
+    
+        $this->template->posts = $this->postFacade->getPublicArticlesPage(
+            $user,
+            $paginator->getOffset(),
+            $paginator->getLength(),
+            $categoryId
+        );
+    
+        $this->template->paginator = $paginator;
+        $this->template->categories = $this->postFacade->getCategories();
+        $this->template->selectedCategory = $categoryId;
+    }    
 }

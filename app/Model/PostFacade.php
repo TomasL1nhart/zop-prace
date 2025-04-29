@@ -16,14 +16,15 @@ final class PostFacade
             ->table('posts')
             ->where('created_at < ?', new \DateTime)
             ->order('created_at DESC');
-
+    
+        // Nepřihlášení uživatelé nevidí archivované příspěvky
         if (!$user || !$user->isLoggedIn()) {
             $query->where('status != ?', 'ARCHIVED');
         }
-
+    
         return $query;
     }
-
+    
     public function getPostById(int $postId, ?Nette\Security\User $user = null)
     {
         $post = $this->database->table('posts')->get($postId);
@@ -38,7 +39,7 @@ final class PostFacade
 
         return $post;
     }
-
+    
     public function addComment(int $postId, int $userId, string $text): void
     {
         $this->database->table('comments')->insert([
@@ -58,8 +59,33 @@ final class PostFacade
             ->fetchAll();
     }
     
+    public function getPublicArticlesCount(?Nette\Security\User $user = null, ?int $categoryId = null): int
+    {
+        $query = $this->database->table('posts');
+        if (!$user || !$user->isLoggedIn()) {
+            $query->where('status != ?', 'ARCHIVED');
+        }
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+        return $query->count('*');
+    }
     
-
+    public function getPublicArticlesPage(?Nette\Security\User $user = null, int $offset, int $limit, ?int $categoryId = null)
+    {
+        $query = $this->database->table('posts')
+            ->order('created_at DESC')
+            ->limit($limit, $offset);
+    
+        if (!$user || !$user->isLoggedIn()) {
+            $query->where('status != ?', 'ARCHIVED');
+        }
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+    
+        return $query;
+    }
     
     public function createPost(array $data)
     {
@@ -87,6 +113,15 @@ final class PostFacade
     {
         return $this->database->table('categories');
     }
+
+    public function deletePost(int $postId): void
+    {
+        $post = $this->database->table('posts')->get($postId);
+        if ($post) {
+            $post->delete();
+        }
+    }
     
+
     
 }
