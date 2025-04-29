@@ -48,7 +48,6 @@ final class EditPresenter extends Nette\Application\UI\Presenter
                 $this->error('Příspěvek nebyl nalezen.');
             }
 
-            // Předvyplníme formulář bez image
             $defaults = $post->toArray();
             unset($defaults['image']);
             $this['postForm']->setDefaults($defaults);
@@ -61,13 +60,12 @@ final class EditPresenter extends Nette\Application\UI\Presenter
         $id = $this->getParameter('id');
         $data = (array) $values;
 
-        // Pokud byl nahrán nový obrázek
         if ($values->image->isOk()) {
             $filename = uniqid() . '_' . $values->image->getSanitizedName();
             $values->image->move(__DIR__ . '/../../../www/uploads/' . $filename);
             $data['image'] = $filename;
         } else {
-            unset($data['image']); // Zachováme starý obrázek (nepřepíšeme NULLem)
+            unset($data['image']); 
         }
 
         if ($id) {

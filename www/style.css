@@ -159,10 +159,14 @@ a:hover {
 }
 
 .post-image {
-    max-width: 100%;
+    max-width: 600px;
+    max-height: 600px;
+    width: auto;
     height: auto;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    display: block;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .post-btn {

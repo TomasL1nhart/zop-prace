@@ -143,12 +143,10 @@ final class PostPresenter extends Nette\Application\UI\Presenter
         $this->error('Příspěvek nebyl nalezen.');
     }
 
-    // Kontrola oprávnění – např. vlastník nebo admin
     if ($post->user_id !== $this->getUser()->getId()) {
         $this->error('Nemáte oprávnění mazat tento příspěvek.');
     }
 
-    // Smazání příspěvku i případného obrázku
     if ($post->image && file_exists("www/uploads/{$post->image}")) {
         unlink("www/uploads/{$post->image}");
     }
