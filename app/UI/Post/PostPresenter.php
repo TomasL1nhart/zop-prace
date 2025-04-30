@@ -165,6 +165,4 @@ final class PostPresenter extends Nette\Application\UI\Presenter
     };
     return $form;
 }
-
-
 }

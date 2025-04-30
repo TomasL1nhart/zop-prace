@@ -38,7 +38,7 @@
 
     <hr class="post-separator">
 
-    {if $user->isLoggedIn()}
+    {if $user->isLoggedIn() && $user->id === $post->user_id}
         <a href="{link Edit:edit id => $post->id}" class="post-btn">✏️ Upravit</a>
     {/if}
 

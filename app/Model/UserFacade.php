@@ -3,8 +3,8 @@
 namespace App\Model;
 
 use Nette\Database\Explorer;
-use Nette\Security\Passwords;
 use Nette\Utils\Validators;
+use Nette\Security\Passwords;
 
 final class UserFacade
 {
@@ -15,37 +15,42 @@ final class UserFacade
 
     public function register(string $username, string $email, string $password): void
     {
-        Validators::assert($email, 'email');
-        Validators::assert($username, 'string:3..20');
-
-        if ($this->db->table('users')->where('email', $email)->fetch()) {
-            throw new \Exception('Email is already registered.');
+        if (!Validators::isEmail($email)) {
+            throw new \InvalidArgumentException('Invalid email address.');
         }
 
-        if ($this->db->table('users')->where('username', $username)->fetch()) {
-            throw new \Exception('Username is already taken.');
+        if ($this->findByUsername($username)) {
+            throw new \RuntimeException('Username is already taken.');
+        }
+
+        if ($this->findByEmail($email)) {
+            throw new \RuntimeException('Email is already registered.');
         }
 
         $this->db->table('users')->insert([
             'username' => $username,
             'email' => $email,
             'password' => $this->passwords->hash($password),
-            'role' => 'user',
+            'role' => 'user', // default role
         ]);
     }
 
-    public function exists(string $email): bool
+    public function findByUsername(string $username): ?array
     {
-        return (bool) $this->db->table('users')->where('email', $email)->fetch();
+        $row = $this->db->table('users')->where('username', $username)->fetch();
+        return $row ? $row->toArray() : null;
     }
 
-    public function findById(int $id): ?\Nette\Database\Table\ActiveRow
+    public function findByEmail(string $email): ?array
     {
-        return $this->db->table('users')->get($id);
+        $row = $this->db->table('users')->where('email', $email)->fetch();
+        return $row ? $row->toArray() : null;
     }
+    public function updateLastLogin(int $userId): void
+    {
+    $this->db->table('users')->where('id', $userId)->update([
+        'last_login' => new \DateTime(),
+    ]);
+}
 
-    public function findByUsername(string $username): ?\Nette\Database\Table\ActiveRow
-    {
-        return $this->db->table('users')->where('username', $username)->fetch();
-    }
 }

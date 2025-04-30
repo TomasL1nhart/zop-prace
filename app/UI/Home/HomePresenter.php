@@ -21,23 +21,24 @@ final class HomePresenter extends Presenter
     {
         $categoryId = is_numeric($category) ? (int) $category : null;
     
-        $paginator = new Paginator;
-        $paginator->setItemsPerPage(4);
-        $paginator->setPage($page);
-    
-        $user = $this->getUser();
-    
-        $paginator->setItemCount($this->postFacade->getPublicArticlesCount($user, $categoryId));
-    
-        $this->template->posts = $this->postFacade->getPublicArticlesPage(
-            $user,
-            $paginator->getOffset(),
-            $paginator->getLength(),
+        $result = $this->postFacade->getPaginatedPublicArticles(
+            $this->getUser(),
+            $page,
+            4,
             $categoryId
         );
     
+        /** @var Paginator $paginator */
+        $paginator = $result['paginator'];
+    
+        if ($paginator->getPage() > $paginator->getLastPage()) {
+            $this->redirect('this', ['page' => $paginator->getLastPage(), 'category' => $category]);
+        }
+    
+        $this->template->posts = $result['posts'];
         $this->template->paginator = $paginator;
         $this->template->categories = $this->postFacade->getCategories();
         $this->template->selectedCategory = $categoryId;
-    }    
+    }
+     
 }

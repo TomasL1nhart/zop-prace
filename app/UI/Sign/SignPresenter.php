@@ -5,26 +5,23 @@ namespace App\UI\Sign;
 use App\Model\Authenticator;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Presenter;
-use Nette\Security\Passwords;
-use Nette\Database\Explorer;
+use Nette\Security\AuthenticationException;
 
-class SignPresenter extends Presenter
+final class SignPresenter extends Presenter
 {
     public function __construct(
-        private Explorer $db,
         private Authenticator $authenticator,
-        private Passwords $passwords,
     ) {}
 
     public function renderIn(): void {}
 
-    public function renderUp(): void {}
-
     protected function createComponentLoginForm(): Form
     {
         $form = new Form;
-        $form->addText('username', 'Username:') ->setRequired();
-        $form->addPassword('password', 'Password:')->setRequired();
+        $form->addText('username', 'Username:')
+            ->setRequired('Please enter your username.');
+        $form->addPassword('password', 'Password:')
+            ->setRequired('Please enter your password.');
         $form->addSubmit('send', 'Sign in');
         $form->onSuccess[] = [$this, 'loginFormSucceeded'];
         return $form;
@@ -33,64 +30,12 @@ class SignPresenter extends Presenter
     public function loginFormSucceeded(Form $form, array $values): void
     {
         try {
-            // najdi uživatele podle jména
-            $userRow = $this->db->table('users')->where('username', $values['username'])->fetch();
-            
-            if (!$userRow) {
-                throw new \Nette\Security\AuthenticationException('User not found.');
-            }
-    
-            // ověř heslo
-            if (!$this->passwords->verify($values['password'], $userRow->password)) {
-                throw new \Nette\Security\AuthenticationException('Invalid password.');
-            }
-    
-            // update last_login
-            $userRow->update([
-                'last_login' => new \DateTime()
-            ]);
-    
-            // přihlášení
-            $identityData = $userRow->toArray();
-            unset($identityData['password']); // neukládej heslo do identity
-    
-            $this->getUser()->login(new \Nette\Security\Identity(
-                $userRow->id,
-                $userRow->role,
-                $identityData
-            ));
-    
+            $this->getUser()->login($values['username'], $values['password']);
+            $this->flashMessage('You are now signed in.');
             $this->redirect('Home:default');
-    
-        } catch (\Nette\Security\AuthenticationException $e) {
-            $form->addError('Incorrect credentials.');
+        } catch (AuthenticationException $e) {
+            $form->addError('Invalid username or password.');
         }
-    }
-    
-
-    protected function createComponentRegisterForm(): Form
-    {
-        $form = new Form;
-        $form->addText('email', 'Email:')->setRequired();
-        $form->addPassword('password', 'Password:')->setRequired()->addRule($form::MIN_LENGTH, 'Min. 6 characters', 6);
-        $form->addSubmit('send', 'Sign up');
-        $form->onSuccess[] = [$this, 'registerFormSucceeded'];
-        return $form;
-    }
-
-    public function registerFormSucceeded(Form $form, array $values): void
-    {
-        $exists = $this->db->table('users')->where('email', $values['email'])->fetch();
-        if ($exists) {
-            $form->addError('Email is already taken.');
-            return;
-        }
-        $this->db->table('users')->insert([
-            'email' => $values['email'],
-            'password' => $this->passwords->hash($values['password']),
-        ]);
-        $this->flashMessage('Registration successful. You can now log in.');
-        $this->redirect('Sign:in');
     }
 
     public function actionOut(): void

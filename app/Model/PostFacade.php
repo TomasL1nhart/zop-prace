@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use Nette;
+use Nette\Utils\Paginator;
 
 final class PostFacade
 {
@@ -59,33 +60,37 @@ final class PostFacade
             ->fetchAll();
     }
     
-    public function getPublicArticlesCount(?Nette\Security\User $user = null, ?int $categoryId = null): int
-    {
+    public function getPaginatedPublicArticles(
+        ?Nette\Security\User $user,
+        int $page,
+        int $itemsPerPage,
+        ?int $categoryId = null
+    ): array {
+        $paginator = new Paginator;
+        $paginator->setPage(max($page, 1));
+        $paginator->setItemsPerPage($itemsPerPage);
+    
         $query = $this->database->table('posts');
+    
         if (!$user || !$user->isLoggedIn()) {
             $query->where('status != ?', 'ARCHIVED');
         }
-        if ($categoryId) {
+        if ($categoryId !== null) {
             $query->where('category_id', $categoryId);
         }
-        return $query->count('*');
-    }
     
-    public function getPublicArticlesPage(?Nette\Security\User $user = null, int $offset, int $limit, ?int $categoryId = null)
-    {
-        $query = $this->database->table('posts')
+        $paginator->setItemCount($query->count('*'));
+    
+        $posts = $query
             ->order('created_at DESC')
-            ->limit($limit, $offset);
+            ->limit($paginator->getLength(), $paginator->getOffset())
+            ->fetchAll();
     
-        if (!$user || !$user->isLoggedIn()) {
-            $query->where('status != ?', 'ARCHIVED');
-        }
-        if ($categoryId) {
-            $query->where('category_id', $categoryId);
-        }
-    
-        return $query;
-    }
+        return [
+            'paginator' => $paginator,
+            'posts' => $posts,
+        ];
+    }    
     
     public function createPost(array $data)
     {

@@ -2,35 +2,34 @@
 
 namespace App\Model;
 
-use Nette\Database\Explorer;
 use Nette\Security\Authenticator as NetteAuthenticator;
 use Nette\Security\Identity;
-use Nette\Security\Passwords;
 use Nette\Security\AuthenticationException;
 
-class Authenticator implements NetteAuthenticator
+final class Authenticator implements NetteAuthenticator
 {
     public function __construct(
-        private Explorer $db,
-        private Passwords $passwords,
+        private UserFacade $userFacade,
     ) {}
 
     public function authenticate(string $username, string $password): Identity
     {
-        $row = $this->db->table('users')->where('username', $username)->fetch();
+        $user = $this->userFacade->findByUsername($username);
 
-        if (!$row || !$this->passwords->verify($password, $row->password)) {
-            throw new AuthenticationException('Invalid credentials.');
+        if (!$user) {
+            throw new AuthenticationException('User not found.');
         }
 
-        return new Identity(
-            $row->id,
-            [$row->role], // role jako pole pro Nette\Security
-            [
-                'username' => $row->username,
-                'email' => $row->email,
-                'role' => $row->role,
-            ]
-        );
+        if (!password_verify($password, $user['password'])) {
+            throw new AuthenticationException('Invalid password.');
+        }
+        $this->userFacade->updateLastLogin($user['id']);
+
+        return new Identity($user['id'], $user['role'], [
+            'username' => $user['username'],
+            'email' => $user['email'],
+            'created_at' => $user['created_at'],
+            'last_login' => $user['last_login'],
+        ]);
     }
 }
