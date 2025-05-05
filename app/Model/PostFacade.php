@@ -18,7 +18,6 @@ final class PostFacade
             ->where('created_at < ?', new \DateTime)
             ->order('created_at DESC');
     
-        // Nepřihlášení uživatelé nevidí archivované příspěvky
         if (!$user || !$user->isLoggedIn()) {
             $query->where('status != ?', 'ARCHIVED');
         }
@@ -126,7 +125,5 @@ final class PostFacade
             $post->delete();
         }
     }
-    
-
     
 }

@@ -18,10 +18,10 @@ final class RegisterPresenter extends Presenter
     protected function createComponentRegisterForm(): Form
     {
         $form = new Form;
-        $form->addText('username', 'Username:') ->setRequired('Please enter your username.');
+        $form->addText('username', 'Uživatelské jméno:')->setRequired('Zadejte prosím své uživatelské jméno.');
         $form->addText('email', 'Email:')->setRequired()->addRule($form::EMAIL);
-        $form->addPassword('password', 'Password:')->setRequired()->addRule($form::MIN_LENGTH, 'At least 6 characters', 6);
-        $form->addSubmit('send', 'Register');
+        $form->addPassword('password', 'Heslo:')->setRequired()->addRule($form::MIN_LENGTH, 'Heslo musí mít alespoň 6 znaků', 6);
+        $form->addSubmit('send', 'Registrovat');
         $form->onSuccess[] = [$this, 'registerFormSucceeded'];
         return $form;
     }
@@ -29,9 +29,8 @@ final class RegisterPresenter extends Presenter
     public function registerFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->users->register($values ['username'], $values['email'], $values['password']);
-            $this->flashMessage('Registration successful. You can now sign in.');
-            $this->redirect('Sign:in');
+            $this->users->register($values['username'], $values['email'], $values['password']);
+            $this->flashMessage('Registrace byla úspěšná. Můžete se nyní přihlásit.', 'success');
         } catch (\Exception $e) {
             $form->addError($e->getMessage());
         }

@@ -14,7 +14,6 @@ final class PostPresenter extends Nette\Application\UI\Presenter
     {
         $post = $this->facade->getPostById($id, $this->getUser());
     
-        // Pokud je archivovaný a uživatel není přihlášený
         if ($post && $post->status === 'ARCHIVED' && !$this->getUser()->isLoggedIn()) {
             $this->template->isArchivedAndRestricted = true;
             return;
@@ -115,46 +114,44 @@ final class PostPresenter extends Nette\Application\UI\Presenter
         $this->flashMessage('Komentář byl přidán.', 'success');
         $this->redirect('this');
     }
-    
-
-    public function handleDeleteImage(int $postId): void
-    {
-        $post = $this->facade->getPostById($postId);
-        if ($post && $post->image && file_exists('www/' . $post->image)) {
-            unlink('www/' . $post->image);
-            $this->facade->updatePost($postId, ['image' => null]);
-            $this->flashMessage('Obrázek byl smazán.', 'success');
-        }
-
-        $this->redirect('this');
-    }
 
     public function handleDeleteComment(int $commentId): void
     {
+        $comment = $this->facade->getCommentById($commentId);
+        if (!$comment) {
+            $this->flashMessage('Komentář nebyl nalezen.', 'error');
+            $this->redirect('this');
+        }
+    
+        if ($comment->user_id !== $this->getUser()->getId() && !$this->getUser()->isInRole('admin')) {
+            $this->flashMessage('Nemáte oprávnění smazat tento komentář.', 'error');
+            $this->redirect('this');
+        }
+    
         $this->facade->deleteComment($commentId);
-        $this->flashMessage('Komentář smazán.', 'success');
+        $this->flashMessage('Komentář byl smazán.', 'success');
         $this->redirect('this');
     }
-
+    
     public function handleDelete(int $id): void
     {
-    $post = $this->facade->getPostById($id);
-    if (!$post) {
-        $this->error('Příspěvek nebyl nalezen.');
-    }
-
-    if ($post->user_id !== $this->getUser()->getId()) {
-        $this->error('Nemáte oprávnění mazat tento příspěvek.');
-    }
-
-    if ($post->image && file_exists("www/uploads/{$post->image}")) {
-        unlink("www/uploads/{$post->image}");
-    }
-
-    $this->facade->deletePost($id);
-    $this->flashMessage('Příspěvek byl smazán.', 'success');
-    $this->redirect('Home:default');
-    }
+        $post = $this->facade->getPostById($id);
+        if (!$post) {
+            $this->error('Příspěvek nebyl nalezen.');
+        }
+    
+        if ($post->user_id !== $this->getUser()->getId() && !$this->getUser()->isInRole('admin')) {
+            $this->error('Nemáte oprávnění mazat tento příspěvek.');
+        }
+    
+        if ($post->image && file_exists("www/uploads/{$post->image}")) {
+            unlink("www/uploads/{$post->image}");
+        }
+    
+        $this->facade->deletePost($id);
+        $this->flashMessage('Příspěvek byl smazán.', 'success');
+        $this->redirect('Home:default');
+    }    
      
     protected function createComponentDeleteForm(): \Nette\Application\UI\Form
 {

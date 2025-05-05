@@ -28,5 +28,5 @@ di:
 
 security:
     debugger: true
-    users: [] # vypnuto, používáme vlastní UserFacade
+    users: [] # vypnuto
 	

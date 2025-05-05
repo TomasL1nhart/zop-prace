@@ -135,6 +135,11 @@
 	</style>
 </head>
 <body>
+	<div id="flash-container">
+		{foreach $flashes as $flash}
+			<div class="flash-message {$flash->type}">{$flash->message}</div>
+		{/foreach}
+	</div>
 	<header>
 		<h1><a href="{link Home:default}">Museblog</a></h1>
 		<nav>
@@ -211,5 +216,20 @@
 		});
 	</script>
 	{/if}
+	<script>
+window.addEventListener('DOMContentLoaded', () => {
+	const messages = document.querySelectorAll('.flash-message');
+	messages.forEach((msg, i) => {
+		setTimeout(() => {
+			// Přidejte třídu pro "out" animaci
+			msg.classList.add('fade-out');
+			
+			// Po dokončení animace, zprávu odstraňte
+			setTimeout(() => msg.remove(), 500);
+		}, 3000 + i * 500);
+	});
+});
+	</script>
+
 </body>
 </html>

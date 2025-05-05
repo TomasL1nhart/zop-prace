@@ -47,28 +47,37 @@ final class EditPresenter extends Nette\Application\UI\Presenter
             if (!$post) {
                 $this->error('Příspěvek nebyl nalezen.');
             }
-
+    
+            if ($post->user_id !== $this->getUser()->getId() && !$this->getUser()->isInRole('admin')) {
+                $this->error('Nemáte oprávnění upravit tento příspěvek.');
+            }
+    
             $defaults = $post->toArray();
             unset($defaults['image']);
             $this['postForm']->setDefaults($defaults);
             $this->template->post = $post;
         }
     }
-
+    
     private function postFormSucceeded(Form $form, \stdClass $values): void
     {
         $id = $this->getParameter('id');
         $data = (array) $values;
-
+    
         if ($values->image->isOk()) {
             $filename = uniqid() . '_' . $values->image->getSanitizedName();
             $values->image->move(__DIR__ . '/../../../www/uploads/' . $filename);
             $data['image'] = $filename;
         } else {
-            unset($data['image']); 
+            unset($data['image']);
         }
-
+    
         if ($id) {
+            $post = $this->facade->getPostById($id);
+            if ($post->user_id !== $this->getUser()->getId() && !$this->getUser()->isInRole('admin')) {
+                $this->flashMessage('Nemáte oprávnění upravit tento příspěvek.', 'error');
+                $this->redirect('this');
+            }
             $this->facade->updatePost($id, $data);
             $this->flashMessage('Příspěvek byl aktualizován.', 'success');
         } else {
@@ -76,9 +85,9 @@ final class EditPresenter extends Nette\Application\UI\Presenter
             $id = $post->id;
             $this->flashMessage('Příspěvek byl vytvořen.', 'success');
         }
-
+    
         $this->redirect('Post:show', $id);
-    }
+    }    
 
     public function startup(): void
     {
