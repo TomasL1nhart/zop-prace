@@ -50,7 +50,13 @@ final class PostFacade
         ]);
     }
     
-    
+    public function addCategory(string $name): void
+    {
+    $this->database->table('categories')->insert([
+        'name' => $name
+    ]);
+    }
+
     public function getComments(int $postId): array
     {
         return $this->database->table('comments')

@@ -38,24 +38,29 @@
 
     <hr class="post-separator">
 
-    {if $user->isLoggedIn() && ($user->id === $post->user_id || $user->isInRole('admin'))}
-        <a href="{link Edit:edit id => $post->id}" class="post-btn">✏️ Upravit</a>
+    {if $user->isLoggedIn() && ($user->isInRole('admin') || ($user->id === $post->user_id))}
+    <a href="{link Edit:edit id => $post->id}" class="post-btn">✏️ Upravit</a>
     {/if}
 
     <h2 class="comments-title">Komentáře ({count($comments)})</h2>
 
     {foreach $comments as $comment}
-        <div class="comment-box">
-            <strong>{$comment->user->username}</strong>
-            <p>{$comment->text}</p>
-        </div>
+    <div class="comment-box">
+        <strong>{$comment->user->username}</strong>
+        <p>{$comment->text}</p>
+
+        {if $user->isLoggedIn() && ($user->id === $comment->user_id || $user->isInRole('admin'))}
+            <a n:href="deleteComment! $comment->id" class="delete-comment" onclick="return confirm('Opravdu chcete smazat tento komentář?');">🗑️ Smazat</a>
+        {/if}
+    </div>
     {/foreach}
 
-    {if $user->isLoggedIn() && $post->status !== 'ARCHIVED'}
-        <form n:name="commentForm" class="comment-form">
-            <textarea n:name="comment" class="comment-textarea" placeholder="Napište svůj komentář..." rows="4"></textarea>
-            <button type="submit" class="post-btn">Odeslat</button>
-        </form>
+
+    {if $user->isLoggedIn() && ($post->status !== 'ARCHIVED' || $user->isInRole('admin'))}
+    <form n:name="commentForm" class="comment-form">
+        <textarea n:name="comment" class="comment-textarea" placeholder="Napište svůj komentář..." rows="4"></textarea>
+        <button type="submit" class="post-btn">Odeslat</button>
+    </form>
     {/if}
 
     {if $user->isLoggedIn() && ($user->id === $post->user_id || $user->isInRole('admin'))}

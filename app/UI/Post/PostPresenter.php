@@ -123,7 +123,7 @@ final class PostPresenter extends Nette\Application\UI\Presenter
             $this->redirect('this');
         }
     
-        if ($comment->user_id !== $this->getUser()->getId() && !$this->getUser()->isInRole('admin')) {
+        if ($comment['user_id'] !== $this->getUser()->getId() && !$this->getUser()->isInRole('admin')) {
             $this->flashMessage('Nemáte oprávnění smazat tento komentář.', 'error');
             $this->redirect('this');
         }

@@ -51,6 +51,23 @@ final class UserFacade
     $this->db->table('users')->where('id', $userId)->update([
         'last_login' => new \DateTime(),
     ]);
-}
+    }
+    public function changePassword(int $userId, string $newPassword): void
+    {
+    $this->database->table('users')
+        ->where('id', $userId)
+        ->update([
+            'password' => password_hash($newPassword, PASSWORD_DEFAULT),
+        ]);
+    }
+    public function getAll(): array
+    {
+    return $this->db->table('users')->fetchAll();
+    }
+
+    public function deleteUser(int $id): void
+    {   
+    $this->db->table('users')->where('id', $id)->delete();
+    }
 
 }

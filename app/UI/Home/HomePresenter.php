@@ -9,19 +9,19 @@ use Nette\Utils\Paginator;
 
 final class HomePresenter extends Presenter
 {
-    private PostFacade $postFacade;
+    private PostFacade $facade;
 
-    public function __construct(PostFacade $postFacade)
+    public function __construct(PostFacade $facade)
     {
         parent::__construct();
-        $this->postFacade = $postFacade;
+        $this->facade = $facade;
     }
 
     public function renderDefault(int $page = 1, $category = null): void
     {
         $categoryId = is_numeric($category) ? (int) $category : null;
     
-        $result = $this->postFacade->getPaginatedPublicArticles(
+        $result = $this->facade->getPaginatedPublicArticles(
             $this->getUser(),
             $page,
             4,
@@ -37,7 +37,7 @@ final class HomePresenter extends Presenter
     
         $this->template->posts = $result['posts'];
         $this->template->paginator = $paginator;
-        $this->template->categories = $this->postFacade->getCategories();
+        $this->template->categories = $this->facade->getCategories();
         $this->template->selectedCategory = $categoryId;
     }
      

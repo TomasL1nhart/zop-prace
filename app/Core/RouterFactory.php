@@ -22,6 +22,8 @@ final class RouterFactory
         // Definování routy pro kategorie
         $router->addRoute('home/category/<id>', 'Home:category');
 
+        $router->addRoute('admin', 'Admin:default');
+
         
         return $router;
     }
