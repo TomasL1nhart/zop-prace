@@ -1,0 +1,70 @@
+{block title}Admin Dashboard{/block}
+
+{block content}
+<main>
+    <h2>📄 Příspěvky</h2>
+    {if $posts}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Název</th>
+                    <th>Kategorie</th>
+                    <th>Akce</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $posts as $post}
+                    <tr>
+                        <td>{$post->title}</td>
+                        <td>{$post->category->name}</td>
+                        <td>
+                            <a n:href="Post:edit id => $post->id" class="btn">Upravit</a>
+                            <a n:href="Post:delete id => $post->id" class="btn btn-danger" onclick="return confirm('Opravdu chcete smazat tento příspěvek?');">Smazat</a>
+                        </td>
+                    </tr>
+                {/foreach}
+            </tbody>
+        </table>
+    {else}
+        <p>Žádné příspěvky k zobrazení.</p>
+    {/if}
+
+    <h2>👥 Uživatelé</h2>
+    {if $users}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Jméno</th>
+                    <th>Email</th>
+                    <th>Akce</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $users as $user}
+                    <tr>
+                        <td>{$user->name}</td>
+                        <td>{$user->email}</td>
+                        <td>
+                            <a n:href="User:changePassword id => $user->id" class="btn">Změnit heslo</a>
+                            <a n:href="User:delete id => $user->id" class="btn btn-danger" onclick="return confirm('Opravdu chcete smazat tohoto uživatele?');">Smazat</a>
+                        </td>
+                    </tr>
+                {/foreach}
+            </tbody>
+        </table>
+    {else}
+        <p>Žádní uživatelé k zobrazení.</p>
+    {/if}
+
+    <h2>🗂️ Nová kategorie</h2>
+    <form n:name="createCategoryForm" class="admin-form">
+        <div>
+            <label for="name">Název kategorie:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <input type="submit" value="Vytvořit kategorii" class="btn">
+        </div>
+    </form>
+</main>
+{/block}

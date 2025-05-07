@@ -15,16 +15,10 @@ final class RouterFactory
     {
         $router = new RouteList;
 
-        // Definování hlavní routy
-
         $router->addRoute('<presenter>/<action>[/<id>]', 'Home:default');
 
-        // Definování routy pro kategorie
-        $router->addRoute('home/category/<id>', 'Home:category');
+        $router->addRoute('admin/dashboard', 'UI:Dashboard:Dashboard:default');
 
-        $router->addRoute('admin', 'Admin:default');
-
-        
         return $router;
     }
 }
