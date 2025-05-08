@@ -9,8 +9,7 @@ services:
     - App\UI\Post\PostPresenter
     - App\UI\Sign\SignPresenter
     - App\UI\Register\RegisterPresenter
-
-
+    - App\UI\Admin\AdminPresenter
 
 search:
 	-	in: %appDir%

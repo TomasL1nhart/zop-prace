@@ -28,7 +28,6 @@ final class PostPresenter extends Nette\Application\UI\Presenter
         $this->template->comments = $this->facade->getComments($id);
     }
     
-    
     public function renderCreate(): void
     {
         $this->template->categories = $this->facade->getCategories();
@@ -56,7 +55,7 @@ final class PostPresenter extends Nette\Application\UI\Presenter
             ->setRequired();
 
         $form->addUpload('image', 'Obrázek:')
-            ->setRequired(false)
+            ->setRequired(true)
             ->addRule($form::IMAGE, 'Soubor musí být obrázek.');
 
         $form->addSubmit('save', 'Vytvořit příspěvek');
@@ -86,7 +85,6 @@ final class PostPresenter extends Nette\Application\UI\Presenter
         $this->flashMessage('Příspěvek byl úspěšně vytvořen.', 'success');
         $this->redirect('Home:default');
     }
-    
 
     protected function createComponentCommentForm(): Form
     {
@@ -135,31 +133,39 @@ final class PostPresenter extends Nette\Application\UI\Presenter
     
     public function handleDelete(int $id): void
     {
-        $post = $this->facade->getPostById($id);
-        if (!$post) {
-            $this->error('Příspěvek nebyl nalezen.');
-        }
-    
-        if ($post->user_id !== $this->getUser()->getId() && !$this->getUser()->isInRole('admin')) {
-            $this->error('Nemáte oprávnění mazat tento příspěvek.');
-        }
-    
-        if ($post->image && file_exists("www/uploads/{$post->image}")) {
-            unlink("www/uploads/{$post->image}");
-        }
-    
-        $this->facade->deletePost($id);
-        $this->flashMessage('Příspěvek byl smazán.', 'success');
-        $this->redirect('Home:default');
-    }    
-     
+    $post = $this->facade->getPostById($id, $this->getUser());
+    if (!$post) {
+        $this->error('Příspěvek nebyl nalezen.');
+    }
+
+    if ($post->user_id !== $this->getUser()->getId() && !$this->getUser()->isInRole('admin')) {
+        $this->flashMessage('Nemáte oprávnění smazat tento příspěvek.', 'error');
+        $this->redirect('this');
+    }
+    if ($post->image && file_exists("www/uploads/{$post->image}")) {
+        unlink("www/uploads/{$post->image}");
+    }
+
+    $this->facade->deletePost($id);
+    $this->flashMessage('Příspěvek byl smazán.', 'success');
+    $this->redirect('Home:default');
+    }   
+
     protected function createComponentDeleteForm(): \Nette\Application\UI\Form
-{
+    {
     $form = new \Nette\Application\UI\Form();
     $form->addSubmit('delete', 'Smazat');
     $form->onSuccess[] = function () {
         $this->handleDelete((int) $this->getParameter('id'));
     };
     return $form;
-}
+    }
+
+    public function handleDeleteCategory(int $categoryId): void
+    {
+    $this->postFacade->deleteCategory($categoryId);
+    $this->flashMessage('Kategorie byla smazána.');
+    $this->redirect('this');
+    }
+
 }

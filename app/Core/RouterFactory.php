@@ -15,9 +15,11 @@ final class RouterFactory
     {
         $router = new RouteList;
 
-        $router->addRoute('<presenter>/<action>[/<id>]', 'Home:default');
+        // Admin route
+        $router->addRoute('admin', 'Admin:default');
 
-        $router->addRoute('admin/dashboard', 'UI:Dashboard:Dashboard:default');
+        // Ostatní presentery
+        $router->addRoute('<presenter>/<action>[/<id>]', 'Home:default');
 
         return $router;
     }

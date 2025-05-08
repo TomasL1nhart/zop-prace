@@ -39,7 +39,12 @@ final class PostFacade
 
         return $post;
     }
-    
+
+    public function findAll(): array
+    {
+    return $this->database->table('posts')->order('created_at DESC')->fetchAll();
+    }
+
     public function addComment(int $postId, int $userId, string $text): void
     {
         $this->database->table('comments')->insert([
@@ -55,6 +60,11 @@ final class PostFacade
     $this->database->table('categories')->insert([
         'name' => $name
     ]);
+    }
+
+    public function findAllCategories(): array
+    {
+    return $this->getCategories()->fetchAll();
     }
 
     public function getComments(int $postId): array
@@ -109,6 +119,14 @@ final class PostFacade
             ->update($data);
     }
 
+        public function deletePost(int $postId): void
+    {
+        $post = $this->database->table('posts')->get($postId);
+        if ($post) {
+            $post->delete();
+        }
+    }
+
     public function deleteComment(int $commentId): void
     {
         $this->database->table('comments')->where('id', $commentId)->delete();
@@ -124,12 +142,12 @@ final class PostFacade
         return $this->database->table('categories');
     }
 
-    public function deletePost(int $postId): void
+    public function deleteCategory(int $categoryId): void
     {
-        $post = $this->database->table('posts')->get($postId);
-        if ($post) {
-            $post->delete();
-        }
+    $category = $this->database->table('categories')->get($categoryId);
+    if ($category) {
+        $category->delete();
     }
-    
+    }
+
 }

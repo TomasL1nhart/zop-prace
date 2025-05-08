@@ -16,15 +16,15 @@ final class UserFacade
     public function register(string $username, string $email, string $password): void
     {
         if (!Validators::isEmail($email)) {
-            throw new \InvalidArgumentException('Invalid email address.');
+            throw new \InvalidArgumentException('Neplatná emailová adresa.');
         }
 
         if ($this->findByUsername($username)) {
-            throw new \RuntimeException('Username is already taken.');
+            throw new \RuntimeException('Tento username již existuje.');
         }
 
         if ($this->findByEmail($email)) {
-            throw new \RuntimeException('Email is already registered.');
+            throw new \RuntimeException('Email už je zaregistrovaný.');
         }
 
         $this->db->table('users')->insert([
@@ -55,7 +55,7 @@ final class UserFacade
     }
     public function changePassword(int $userId, string $newPassword): void
     {
-    $this->database->table('users')
+    $this->db->table('users')
         ->where('id', $userId)
         ->update([
             'password' => $this->passwords->hash($newPassword),
