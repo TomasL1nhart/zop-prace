@@ -41,7 +41,7 @@ final class SignPresenter extends Presenter
     public function actionOut(): void
     {
         $this->getUser()->logout(true);
-        $this->flashMessage('Byli jste odhlášeni.');
+        $this->flashMessage('Byl jste odhlášen.');
         $this->redirect('Home:default');
     }
 }

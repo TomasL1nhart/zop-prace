@@ -1,6 +1,5 @@
 {block content}
 
-<!-- Filtrování podle kategorie -->
 <form method="get" class="filter-form mb-6">
     <label for="category" class="filter-label">Filtrovat podle kategorie:</label>
     <select name="category" id="category" class="filter-select" onchange="this.form.submit()">
@@ -22,7 +21,7 @@
                 Kategorie: {$post->ref('categories', 'category_id')->name}
             </div>
 
-            {=implode(' ', array_slice(explode(' ', strip_tags($post->content)), 0, 25))}...
+            {=implode(' ', array_slice(explode(' ', strip_tags($post->content)), 0, 10))}...
             <br>
             Stav:
             {if $post->status === 'OPENED'}

@@ -56,7 +56,11 @@
     {/foreach}
 
 
-    {if $user->isLoggedIn() && ($post->status !== 'ARCHIVED' || $user->isInRole('admin'))}
+    {if $user->isLoggedIn() && (
+    ($post->status !== 'ARCHIVED' && $post->status !== 'CLOSED') ||
+    $user->id === $post->user_id ||
+    $user->isInRole('admin')
+    )}
     <form n:name="commentForm" class="comment-form">
         <textarea n:name="comment" class="comment-textarea" placeholder="Napište svůj komentář..." rows="4"></textarea>
         <button type="submit" class="post-btn">Odeslat</button>

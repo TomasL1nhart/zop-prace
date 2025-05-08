@@ -217,7 +217,8 @@
 	</script>
 	{/if}
 	<script>
-window.addEventListener('DOMContentLoaded', () => {
+
+	window.addEventListener('DOMContentLoaded', () => {
 	const messages = document.querySelectorAll('.flash-message');
 	messages.forEach((msg, i) => {
 		setTimeout(() => {
@@ -228,8 +229,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			setTimeout(() => msg.remove(), 500);
 		}, 3000 + i * 500);
 	});
-});
+	});
 	</script>
-
 </body>
 </html>

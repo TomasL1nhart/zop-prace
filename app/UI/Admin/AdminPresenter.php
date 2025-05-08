@@ -35,7 +35,6 @@ final class AdminPresenter extends Presenter
         $this->template->categories = $this->facade->findAllCategories();
     }
     
-
     public function handleDeletePost(int $postId): void
     {
         $this->facade->deletePost($postId);
@@ -83,10 +82,10 @@ final class AdminPresenter extends Presenter
     }
 
     public function handleDeleteCategory(int $categoryId): void
-{
+    {
     $this->facade->deleteCategory($categoryId);
     $this->flashMessage('Kategorie byla smazána.');
     $this->redirect('this');
-}
+    }
 
 }

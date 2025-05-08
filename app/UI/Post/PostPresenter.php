@@ -46,7 +46,6 @@ final class PostPresenter extends Nette\Application\UI\Presenter
             $form->addSelect('status', 'Stav:', [
                 'OPENED' => 'Otevřený',
                 'CLOSED' => 'Uzavřený',
-                'ARCHIVED' => 'Archivovaný',
             ])->setRequired();
             
 
@@ -104,13 +103,29 @@ final class PostPresenter extends Nette\Application\UI\Presenter
     
     private function commentFormSucceeded(Form $form, \stdClass $values): void
     {
-        $postId = (int) $this->getParameter('id');
-        $userId = $this->getUser()->getId();
-    
-        $this->facade->addComment($postId, $userId, $values->comment);
-    
-        $this->flashMessage('Komentář byl přidán.', 'success');
+    $postId = (int) $this->getParameter('id');
+    $userId = $this->getUser()->getId();
+
+    $post = $this->facade->getPostById($postId, $this->getUser());
+
+    if (!$post) {
+        $this->flashMessage('Příspěvek nebyl nalezen.', 'error');
         $this->redirect('this');
+    }
+
+    if (
+        $post->status === 'CLOSED' &&
+        $post->user_id !== $userId &&
+        !$this->getUser()->isInRole('admin')
+    ) {
+        $this->flashMessage('Do uzavřeného příspěvku nemůžete přidávat komentáře.', 'error');
+        $this->redirect('this');
+    }
+
+    $this->facade->addComment($postId, $userId, $values->comment);
+
+    $this->flashMessage('Komentář byl přidán.', 'success');
+    $this->redirect('this');
     }
 
     public function handleDeleteComment(int $commentId): void
@@ -142,9 +157,10 @@ final class PostPresenter extends Nette\Application\UI\Presenter
         $this->flashMessage('Nemáte oprávnění smazat tento příspěvek.', 'error');
         $this->redirect('this');
     }
-    if ($post->image && file_exists("www/uploads/{$post->image}")) {
-        unlink("www/uploads/{$post->image}");
+    if ($post->image && file_exists(__DIR__ . '/../../../www/uploads/' . $post->image)) {
+    unlink(__DIR__ . '/../../../www/uploads/' . $post->image);
     }
+
 
     $this->facade->deletePost($id);
     $this->flashMessage('Příspěvek byl smazán.', 'success');
