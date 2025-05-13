@@ -21,7 +21,7 @@ final class HomePresenter extends Presenter
     {
         $categoryId = is_numeric($category) ? (int) $category : null;
     
-        $result = $this->facade->getPaginatedPublicArticles(
+        $result = $this->facade->getPaginatedArticles(
             $this->getUser(),
             $page,
             4,

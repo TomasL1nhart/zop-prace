@@ -146,12 +146,17 @@
 			<a href="{link Home:default}">Domů</a>
 			{if $user->isLoggedIn()}
 				<a href="{link Post:create}">Nový Příspěvek</a>
-				<div class="user-avatar" id="userAvatar">
-					<img src="{$basePath}/images/default-avatar.png" alt="Profil">
-				</div>
+	
+			{if $user->isInRole('admin')}
+				<a href="{link Admin:default}">Admin Panel</a>
+			{/if}
+	
+			<div class="user-avatar" id="userAvatar">
+				<img src="{$basePath}/images/default-avatar.png" alt="Profil">
+			</div>
 			{else}
-				<a href="{link Sign:in}">Přihlásit se</a>
-				<a href="{link Register:register}">Registrovat</a>
+			<a href="{link Sign:in}">Přihlásit se</a>
+			<a href="{link Register:register}">Registrovat</a>
 			{/if}
 		</nav>
 	</header>
@@ -218,6 +223,7 @@
 	{/if}
 	<script>
 
+	// dost pravděpodobně nefunguje
 	window.addEventListener('DOMContentLoaded', () => {
 	const messages = document.querySelectorAll('.flash-message');
 	messages.forEach((msg, i) => {

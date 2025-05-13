@@ -46,15 +46,21 @@
 
     {foreach $comments as $comment}
     <div class="comment-box">
+    <div class="comment-meta">
         <strong>{$comment->user->username}</strong>
-        <p>{$comment->text}</p>
+        <span class="user-role">({$comment->user->role})</span>
+    </div>
+    <p>{$comment->text}</p>
 
-        {if $user->isLoggedIn() && ($user->id === $comment->user_id || $user->isInRole('admin'))}
-            <a n:href="deleteComment! $comment->id" class="delete-comment" onclick="return confirm('Opravdu chcete smazat tento komentář?');">🗑️ Smazat</a>
-        {/if}
+    {if $user->isLoggedIn() && ($user->id === $comment->user_id || $user->isInRole('admin'))}
+        <a n:href="deleteComment! $comment->id" class="delete-comment" onclick="return confirm('Opravdu chcete smazat tento komentář?');">🗑️ Smazat</a>
+    {/if}
     </div>
     {/foreach}
 
+    {if !$comments}
+    <p class="no-comments">Žádné komentáře zatím nejsou.</p>
+    {/if}
 
     {if $user->isLoggedIn() && (
     ($post->status !== 'ARCHIVED' && $post->status !== 'CLOSED') ||

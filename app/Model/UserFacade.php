@@ -46,13 +46,14 @@ final class UserFacade
         $row = $this->db->table('users')->where('email', $email)->fetch();
         return $row ? $row->toArray() : null;
     }
+
     public function updateLastLogin(int $userId): void
     {
     $this->db->table('users')->where('id', $userId)->update([
         'last_login' => new \DateTime(),
     ]);
-
     }
+
     public function changePassword(int $userId, string $newPassword): void
     {
     $this->db->table('users')

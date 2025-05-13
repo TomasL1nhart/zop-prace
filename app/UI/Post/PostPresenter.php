@@ -56,7 +56,6 @@ final class PostPresenter extends Nette\Application\UI\Presenter
         $form->addUpload('image', 'Obrázek:')
             ->setRequired(true)
             ->addRule($form::IMAGE, 'Soubor musí být obrázek.');
-
         $form->addSubmit('save', 'Vytvořit příspěvek');
 
         $form->onSuccess[] = $this->postFormSucceeded(...);
@@ -161,7 +160,6 @@ final class PostPresenter extends Nette\Application\UI\Presenter
     unlink(__DIR__ . '/../../../www/uploads/' . $post->image);
     }
 
-
     $this->facade->deletePost($id);
     $this->flashMessage('Příspěvek byl smazán.', 'success');
     $this->redirect('Home:default');
@@ -176,12 +174,4 @@ final class PostPresenter extends Nette\Application\UI\Presenter
     };
     return $form;
     }
-
-    public function handleDeleteCategory(int $categoryId): void
-    {
-    $this->postFacade->deleteCategory($categoryId);
-    $this->flashMessage('Kategorie byla smazána.');
-    $this->redirect('this');
-    }
-
 }

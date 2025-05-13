@@ -75,7 +75,7 @@ final class PostFacade
             ->fetchAll();
     }
     
-    public function getPaginatedPublicArticles(
+    public function getPaginatedArticles(
         ?Nette\Security\User $user,
         int $page,
         int $itemsPerPage,
