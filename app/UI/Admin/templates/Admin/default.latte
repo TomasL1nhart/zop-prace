@@ -1,62 +1,74 @@
 {block content}
-<link rel="stylesheet" href="{$basePath}/admin.css">
-<title>{block title}Museblog - Panel{/block}</title>
-<h1 class="admin-title">Museblog Panel</h1>
+    <link rel="stylesheet" href="{$basePath}/admin.css">
+    <title>{block title}Museblog - Panel{/block}</title>
+    <h1 class="admin-title">Museblog Panel</h1>
 
-<section class="admin-section">
-    <h2 class="section-title">Příspěvky</h2>
-    <ul class="admin-list">
-        {foreach $posts as $post}
-            <li class="admin-card">
-                <strong>{$post->title}</strong><br>
-                <a n:href="deletePost! $post->id" onclick="return confirm('Opravdu smazat příspěvek?')" class="btn btn-delete">Smazat</a>
-                <a n:href=":Edit:edit $post->id" class="btn btn-edit">Upravit</a>
-            </li>
-        {/foreach}
-    </ul>
-</section>
+    <section class="admin-section">
+        <h2 class="section-title">Příspěvky</h2>
+        <ul n:snippet="posts" ...="id=posts" class="admin-list">
+            {foreach $posts as $post}
+                <li class="admin-card">
+                    <strong>{$post->title}</strong><br>
+                    <a n:href="deletePost! $post->id"
+                       class="btn btn-delete ajax"
+                       onclick="return confirm('Opravdu smazat příspěvek?')">Smazat</a>
+                    <a n:href=":Edit:edit $post->id" class="btn btn-edit">Upravit</a>
+                </li>
+            {/foreach}
+        </ul>
+    </section>
 
-<section class="admin-section">
-    <h2 class="section-title">Uživatelé</h2>
-<ul class="admin-list">
-    {foreach $users as $itemUser}
-        <li class="admin-card">
-            <div class="user-header">
-                <strong>{$itemUser->username}</strong> (<em>{$itemUser->email}</em>)
-                <a n:href="deleteUser! $itemUser->id"
-                   onclick="return confirm('Opravdu chcete smazat uživatele {$itemUser->username}?')"
-                   class="btn btn-delete small">Smazat</a>
-            </div>
+    <section class="admin-section">
+        <h2 class="section-title">Uživatelé</h2>
+        <ul n:snippet="users" ...="id=users" class="admin-list">
+            {foreach $users as $itemUser}
+                <li class="admin-card">
+                    <div class="user-header">
+                        <strong>{$itemUser->username}</strong> (<em>{$itemUser->email}</em>)
+                        <a n:href="deleteUser! $itemUser->id"
+                           class="btn btn-delete small ajax"
+                           onclick="return confirm('Opravdu chcete smazat uživatele {$itemUser->username}?')">Smazat</a>
+                    </div>
 
-            <form n:name="changePasswordForms-{$itemUser->id}" class="password-form">
-                {input newPassword placeholder => 'Nové heslo'}
-                {input change}
-            </form>
-        </li>
-    {/foreach}
-</ul>
-</section>
+                    <form n:name="changePasswordForms-{$itemUser->id}" class="password-form ajax">
+                        {input newPassword placeholder => 'Nové heslo'}
+                        {input change}
+                    </form>
+                </li>
+            {/foreach}
+        </ul>
+    </section>
 
-<section class="admin-section">
-    <h2 class="section-title">Přidat kategorii</h2>
-    <form n:name="addCategoryForm" class="category-form">
-        <input type="text" n:name="name" placeholder="Název kategorie">
-        <button type="submit" class="btn btn-add">Přidat</button>
-    </form>
+    <section class="admin-section">
+        <h2 class="section-title">Přidat kategorii</h2>
+        <form n:name="addCategoryForm" class="category-form ajax">
+            <input type="text" n:name="name" placeholder="Název kategorie">
+            <button type="submit" class="btn btn-add">Přidat</button>
+        </form>
 
-    <h3 class="subsection-title">Existující kategorie</h3>
-    <ul class="admin-list">
-        {foreach $categories as $category}
-            <li class="admin-card">
-                {$category->name}
-                <a n:href="deleteCategory! $category->id"
-                   onclick="return confirm('Opravdu chcete smazat kategorii {$category->name}?')"
-                   class="btn btn-delete small">Smazat</a>
-            </li>
-        {/foreach}
-    </ul>
-</section>
-	<footer>
-		<p>&copy; {=date('Y')} Museblog</p>
-	</footer>
+        <h3 class="subsection-title">Existující kategorie</h3>
+        <ul n:snippet="categories" ...="id=categories" class="admin-list">
+            {foreach $categories as $category}
+                <li class="admin-card">
+                    {$category->name}
+                    <a n:href="deleteCategory! $category->id"
+                       class="btn btn-delete small ajax"
+                       onclick="return confirm('Opravdu chcete smazat kategorii {$category->name}?')">Smazat</a>
+                </li>
+            {/foreach}
+        </ul>
+    </section>
+
+    <footer>
+        <p>&copy; {=date('Y')} Museblog</p>
+    </footer>
+{/block}
+
+{block scripts}
+    <script src="https://unpkg.com/naja@3/dist/Naja.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            naja.initialize();
+        });
+    </script>
 {/block}
