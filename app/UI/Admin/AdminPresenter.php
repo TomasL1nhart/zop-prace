@@ -37,15 +37,22 @@ final class AdminPresenter extends Presenter
     
     public function handleDeletePost(int $postId): void
     {
-        $this->facade->deletePost($postId);
-        $this->flashMessage('Post deleted.');
-        $this->redirect('this');
+    $post = $this->facade->getPostById($postId);
+    
+    $imagePath = __DIR__ . '/../../../www/uploads/' . $post->image;
+    if ($post->image && file_exists($imagePath)) {
+        unlink($imagePath);
+    }
+
+    $this->facade->deletePost($postId);
+    $this->flashMessage('Příspěvek byl smazán.');
+    $this->redirect('this');
     }
 
     public function handleDeleteUser(int $userId): void
     {
         $this->userFacade->deleteUser($userId); 
-        $this->flashMessage('User deleted.');
+        $this->flashMessage('Uživatel byl smazán.');
         $this->redirect('this');
     }
 

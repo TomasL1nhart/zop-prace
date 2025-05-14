@@ -148,6 +148,6 @@ final class PostFacade
     if ($category) {
         $category->delete();
     }
-    }
-
+    } 
+    
 }
