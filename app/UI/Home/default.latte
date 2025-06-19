@@ -12,26 +12,36 @@
     </select>
 </form>
 
-<div class="grid gap-6">
+<div class="grid gap-24">
     {foreach $posts as $post}
         <div class="post-card">
-            <h3><a href="{link Post:show id => $post->id}">{$post->title}</a></h3>
+            <div class="post-date">
+                Datum vytvoření: {$post->created_at|date:'j. n. Y'}
+            </div>
+
+            <h3 class="text-lg font-semibold mb-1">
+                <a href="{link Post:show id => $post->id}">{$post->title}</a>
+            </h3>
 
             <div class="text-sm text-gray-500 mb-1">
                 Kategorie: {$post->ref('categories', 'category_id')->name}
             </div>
 
-            {=implode(' ', array_slice(explode(' ', strip_tags($post->content)), 0, 10))}...
-            <br>
-            Stav:
-            {if $post->status === 'OPENED'}
-            <span style="color: green; font-weight: bold;">Otevřený</span>
-             {elseif $post->status === 'CLOSED'}
-            <span style="color: orange; font-weight: bold;">Uzavřený</span>
-            {elseif $post->status === 'ARCHIVED'}
-            <span style="color: gray; font-weight: bold;">Archivovaný</span>
-            {/if}
-            <br>
+            <div class="mb-2">
+                {=implode(' ', array_slice(explode(' ', strip_tags($post->content)), 0, 10))}...
+            </div>
+
+            <div class="mb-2">
+                Stav:
+                {if $post->status === 'OPENED'}
+                    <span style="color: green; font-weight: bold;">Otevřený</span>
+                {elseif $post->status === 'CLOSED'}
+                    <span style="color: orange; font-weight: bold;">Uzavřený</span>
+                {elseif $post->status === 'ARCHIVED'}
+                    <span style="color: gray; font-weight: bold;">Archivovaný</span>
+                {/if}
+            </div>
+
             <a href="{link Post:show id => $post->id}" class="btn mt-3">Číst více</a>
         </div>
     {/foreach}

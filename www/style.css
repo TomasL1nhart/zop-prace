@@ -178,11 +178,21 @@ a:hover {
 
 /* Karta příspěvku */
 .post-card {
+    position: relative;
 	padding: 1.5em;
 	background-color: #fff;
 	border-radius: 10px;
+    margin-bottom: 1.5rem;
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-date {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
 }
 
 .post-card:hover {
