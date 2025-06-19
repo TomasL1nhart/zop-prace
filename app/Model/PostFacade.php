@@ -40,6 +40,11 @@ final class PostFacade
         return $post;
     }
 
+    public function getPostByIdWithoutFilter(int $id): ?\Nette\Database\Table\ActiveRow
+{
+    return $this->database->table('posts')->get($id);
+}
+
     public function findAll(): array
     {
     return $this->database->table('posts')->order('created_at DESC')->fetchAll();
