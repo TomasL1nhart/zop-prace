@@ -3,3 +3,32 @@
 <h1>Nový příspěvek</h1>
 
 {control postForm}
+
+<img id="imagePreview" src="" alt="Náhled obrázku" style="display: none; max-width: 300px; margin-top: 1rem; border-radius: 10px;">
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.querySelector('input[type="file"][name="image"]');
+    const preview = document.getElementById('imagePreview');
+
+    if (input) {
+        input.addEventListener('change', function () {
+            const file = this.files[0];
+
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+
+{/block}
