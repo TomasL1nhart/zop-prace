@@ -30,8 +30,14 @@ final class PostPresenter extends Nette\Application\UI\Presenter
     
     public function renderCreate(): void
     {
-        $this->template->categories = $this->facade->getCategories();
-    }    
+        if (!$this->getUser()->isLoggedIn()) {
+            $this->flashMessage('Pro vytvoření příspěvku se musíte přihlásit.', 'warning');
+        $this->redirect('Sign:in');
+    }
+
+    $this->template->categories = $this->facade->getCategories();
+}
+
 
     protected function createComponentPostForm(): Form
     {
