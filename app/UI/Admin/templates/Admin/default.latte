@@ -3,6 +3,14 @@
     <title>{block title}Museblog - Panel{/block}</title>
     <h1 class="admin-title">Museblog Panel</h1>
 
+    <div n:snippet="flashMessages" class="flash-container">
+        {foreach $flashes as $flash}
+            <div class="flash-message {$flash->type}">
+                {$flash->message}
+            </div>
+        {/foreach}
+    </div>
+
     <section class="admin-section">
         <h2 class="section-title">Příspěvky</h2>
         <ul n:snippet="posts" ...="id=posts" class="admin-list">
@@ -39,25 +47,27 @@
         </ul>
     </section>
 
-    <section class="admin-section">
-        <h2 class="section-title">Přidat kategorii</h2>
+<section class="admin-section">
+    <h2 class="section-title">Přidat kategorii</h2>
+    <div n:snippet="addCategoryForm">
         <form n:name="addCategoryForm" class="category-form ajax">
             <input type="text" n:name="name" placeholder="Název kategorie">
             <button type="submit" class="btn btn-add">Přidat</button>
         </form>
+    </div>
 
-        <h3 class="subsection-title">Existující kategorie</h3>
-        <ul n:snippet="categories" ...="id=categories" class="admin-list">
-            {foreach $categories as $category}
-                <li class="admin-card">
-                    {$category->name}
-                    <a n:href="deleteCategory! $category->id"
-                       class="btn btn-delete small ajax"
-                       onclick="return confirm('Opravdu chcete smazat kategorii {$category->name}?')">Smazat</a>
-                </li>
-            {/foreach}
-        </ul>
-    </section>
+    <h3 class="subsection-title">Existující kategorie</h3>
+    <ul n:snippet="categories" ...="id=categories" class="admin-list">
+        {foreach $categories as $category}
+            <li class="admin-card">
+                {$category->name}
+                <a n:href="deleteCategory! $category->id"
+                   class="btn btn-delete small ajax"
+                   onclick="return confirm('Opravdu chcete smazat kategorii {$category->name}?')">Smazat</a>
+            </li>
+        {/foreach}
+    </ul>
+</section>
 
     <footer>
         <p>&copy; {=date('Y')} Museblog</p>
@@ -69,6 +79,17 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             naja.initialize();
+
+            naja.addEventListener('success', (event) => {
+                const payload = event.detail.payload;
+
+                if (event.detail.form && event.detail.form.classList.contains('category-form')) {
+                    const input = event.detail.form.querySelector('input[name="name"]');
+                    if (input) {
+                        input.value = '';
+                    }
+                }
+            });
         });
     </script>
 {/block}

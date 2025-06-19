@@ -33,6 +33,7 @@ final class AdminPresenter extends Presenter
         $this->template->posts = $this->facade->findAll();
         $this->template->users = $this->userFacade->getAll();
         $this->template->categories = $this->facade->findAllCategories();
+        $this->template->addCategoryForm = $this['addCategoryForm'];
     }
 
     public function handleDeletePost(int $postId): void
@@ -101,22 +102,25 @@ final class AdminPresenter extends Presenter
 
     protected function createComponentAddCategoryForm(): Form
     {
-        $form = new Form;
-        $form->addText('name', 'Category name:')
-            ->setRequired();
-        $form->addSubmit('add', 'Add');
+    $form = new Form;
+    $form->addText('name', 'Category name:')
+        ->setRequired();
+    $form->addSubmit('add', 'Add');
 
-        $form->onSuccess[] = function (Form $form, array $values): void {
-            $this->facade->addCategory($values['name']);
-            $this->flashMessage('Kategorie přidána.');
+    $form->onSuccess[] = function (Form $form, array $values): void {
+        $this->facade->addCategory($values['name']);
+        $this->flashMessage('Kategorie přidána.');
 
-            if ($this->isAjax()) {
-                $this->redrawControl('categories');
-                $this->redrawControl('flashMessages');
-            } else {
-                $this->redirect('this');
-            }
-        };
-        return $form;
+        $form->setValues(['name' => ''], true);
+
+        if ($this->isAjax()) {
+            $this->redrawControl('categories');
+            $this->redrawControl('flashMessages');
+            $this->redrawControl('addCategoryForm');
+        } else {
+            $this->redirect('this');
+        }
+    };
+    return $form;
     }
 }

@@ -7,6 +7,40 @@ body {
 	line-height: 1.6;
 }
 
+#flash-container {
+	position: fixed;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 10000;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+}
+
+.flash-message {
+	background-color: #2ecc71; /* success */
+	color: white;
+	padding: 15px 25px;
+	border-radius: 6px;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+	font-size: 16px;
+	opacity: 0;
+	transform: translateY(-20px);
+    font-weight: bold;
+	animation: slideDownFade 0.5s ease-out forwards;
+	transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Variace pro různé typy */
+.flash-message.error {
+	background-color: #e74c3c;
+}
+.flash-message.warning {
+	background-color: #f39c12;
+}
+
 .admin-title {
 	text-align: center;
 	margin: 2rem 0 1rem;
